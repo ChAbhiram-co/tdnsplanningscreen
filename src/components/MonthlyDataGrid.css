@@ -1,0 +1,335 @@
+.monthly-grid-container {
+  font-family: "Poppins", Arial, sans-serif;
+  padding: 30px;
+  box-sizing: border-box;
+  background: #f8f9fb;
+  color: #333;
+  position: relative;
+  min-width: 1513px;
+}
+
+.monthly-grid-container h2 {
+  margin-top: 1px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 22px;
+  text-align: center;
+  margin-left: 7px;
+  margin-right: 1175px;
+}
+
+/* === Buttons === */
+.buttons {
+  margin-bottom: 13px;
+  text-align: center;
+  margin-left: 52px;
+  width: 750px;
+}
+
+.buttons button {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin: 0 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;              
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buttons button:hover {
+  border-color: #1890ff;
+  background: #e6f4ff;
+  color: #1890ff;
+}
+
+/* === Table === */
+.schedule-table {
+  width: 90%;
+  margin: 0 auto 3px auto;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border: 1px solid #000; 
+}     
+
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #000;
+  text-align: center;
+  font-size: 13px;
+  padding: 6px;
+  min-width: 30px;
+}
+
+.schedule-table .shift-cell {
+  border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+}
+
+/* Preserve black borders on extreme left/right */
+.schedule-table .shift-row th:first-child,
+.schedule-table tbody tr td.shift-cell:first-child {
+  border-left: 1px solid #000 !important;
+}
+.schedule-table .shift-row th:last-child,
+.schedule-table tbody tr td.shift-cell:last-child {
+  border-right: 1px solid #000 !important;
+}
+
+/* Bottom border of header row = black */
+.schedule-table thead .shift-row th {
+  border-bottom: 1px solid #000 !important;
+}
+
+/* Black separator after shift 1, 2, 3 across header + body */
+.schedule-table .black-separator {
+  border-right: 1px solid #000 !important;
+}
+
+/* Day end separator */
+.schedule-table .day-separator {
+  border-right: 1px solid #000 !important;
+}
+
+/* Headers */
+.day-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+  background: #f5f5f5;
+}
+
+.date-cell {
+  font-size: 12px;
+  font-weight: 400;
+  background: #f9f9f9;
+  color: #555;
+}
+
+/* Region/Sub columns */
+.region-col {
+  width: 100px;
+  background: #fafafa;
+}
+
+.sub-col {
+  width: 120px;
+  background: #fafafa;
+}
+
+.region-name {
+  font-weight: 600;
+  text-align: left;
+  padding-left: 8px;
+  background: #fafafa;
+}
+
+.sub-name {
+  text-align: left;
+  padding-left: 8px;
+  background: #fcfcfc;
+}
+
+/* Event block inside cells */
+.cell {
+  height: 45px;
+  position: relative;
+}
+
+.event-block {
+  position: absolute;        
+  top: 0;
+  left: 0;
+  width: 95%;
+  height: 100%;              
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  padding: 2px 6px;
+  box-sizing: border-box;
+  color: #000;               
+  white-space: nowrap;
+  overflow: hidden;           
+  white-space: nowrap;         
+  text-overflow: ellipsis;     
+    
+}
+
+/* 🔹 Create Test Modal */
+.create-test-modal {
+ top:0%
+}
+.create-test-modal .ant-modal-content {
+  border-radius: 1px;
+  padding: 20px 24px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  width: 430px !important;   /* smaller popup */
+  max-width: 90%;
+  
+
+}
+
+.create-test-modal .ant-modal-header {
+  border-bottom: none;
+  padding: 0 0 10px;
+  background: transparent;
+}
+
+.create-test-modal .ant-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a237e;   /* dark blue title */
+}
+
+.create-test-modal .ant-modal-body {
+  margin-top: 5px;
+  color: #222;  /* dark readable text */
+}
+
+/* 🔹 Form Groups */
+.form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+/* 🔹 Inputs / Select */
+.form-control,
+.ant-select-selector,
+.ant-picker {
+  padding: 8px 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid #ccc !important;
+  font-size: 13px;
+  background: #fafafa;
+  color: #222 !important;
+  transition: all 0.25s ease;
+}
+
+.form-control:focus,
+.ant-select-selector:focus,
+.ant-picker-focused {
+  border-color: #1677ff !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2) !important;
+  background: #fff;
+}
+
+/* 🔹 Buttons */
+.create-test-modal .ant-modal-footer {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.create-test-modal .ant-btn-primary {
+  background: #1677ff;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 5px 14px;
+  transition: background 0.3s ease;
+}
+
+.create-test-modal .ant-btn-primary:hover {
+  background: #125ecc;
+}
+
+.create-test-modal .ant-btn-default {
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 5px 14px;
+  color: #333;
+  border: 1px solid #bbb;
+}
+
+.create-test-modal .ant-modal {
+  top: 20% !important;      
+  margin: 0 auto;
+  width: 300px !important; 
+}
+
+/* 🔹 Move modal slightly lower */
+.ant-modal {
+  top: 28px !important;
+}
+
+/* Add black border after shift 2 */
+.shift-cell.black-separator {
+  border-right: 1px solid black !important;
+}
+/* Green dot (active indicator) */
+.witness-dot {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #28a745; /* bright green */
+  box-shadow: 0 0 6px #28a745; /* glowing effect */
+  display: inline-block;
+}
+
+/* Event star (⭐) */
+.event-star {
+  font-size: 18px;
+  color: gold;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.event-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;               /* small spacing when inline */
+  white-space: nowrap;    /* keep inline clean */
+}
+
+/* ✅ When the container is narrow, stack vertically */
+.event-text {
+  flex-direction: row;    /* default inline */
+}
+
+.event-text:has(.event-star) {
+  flex-wrap: wrap;        /* allow stacking if tight */
+}
+
+.event-text .event-star {
+  font-size: 14px;        /* keep star sized nicely */
+}
+
+/* ✅ Force vertical when cell is really small */
+@container cell (max-width: 60px) {
+  .event-text {
+    flex-direction: column;
+    white-space: normal;
+    gap: 0;
+  }
+}
+
+/* Ensure split blocks never overflow */
+.cell > div > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Hide the slider tooltip after value is selected */
+.ant-tooltip {
+  display: none !important;
+}
