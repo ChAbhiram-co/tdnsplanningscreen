@@ -1601,8 +1601,8 @@ function MonthlyDataGrid() {
 
   // ---- split modal state ----
   const [splitModalVisible, setSplitModalVisible] = useState(false);
-  const [splitPercent, setSplitPercent] = useState(50); // 1..99
-  const [splitSide, setSplitSide] = useState("left"); // 'left' or 'right'
+  const [splitPercent, setSplitPercent] = useState(50); 
+  const [splitSide, setSplitSide] = useState("left"); 
   const [eventToSplit, setEventToSplit] = useState(null);
 
   const handleSplitEvent = (eventKey, mergedEvent) => {
