@@ -2039,6 +2039,7 @@ function MonthlyDataGrid() {
                           )
                         );
 
+                        
                         if (evContaining) {
                           const currentWeekStart = weekDays[0];
                           const currentWeekEnd = weekDays[weekDays.length - 1];
