@@ -2039,7 +2039,7 @@ function MonthlyDataGrid() {
                           )
                         );
 
-                        
+
                         if (evContaining) {
                           const currentWeekStart = weekDays[0];
                           const currentWeekEnd = weekDays[weekDays.length - 1];
@@ -2052,6 +2052,9 @@ function MonthlyDataGrid() {
                                 !p.date.isAfter(currentWeekEnd, "day")
                             )
                             .map(({ idx }) => idx);
+
+
+                            
 
                           if (indicesInWeek.length > 0) {
                             const firstWeekPartIdx = indicesInWeek[0];
