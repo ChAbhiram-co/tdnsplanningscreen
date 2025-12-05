@@ -2053,9 +2053,6 @@ function MonthlyDataGrid() {
                             )
                             .map(({ idx }) => idx);
 
-
-                            
-
                           if (indicesInWeek.length > 0) {
                             const firstWeekPartIdx = indicesInWeek[0];
                             const lastWeekPartIdx = indicesInWeek[indicesInWeek.length - 1];
