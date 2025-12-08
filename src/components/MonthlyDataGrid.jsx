@@ -2050,11 +2050,8 @@ function MonthlyDataGrid() {
                               ({ p }) =>
                                 !p.date.isBefore(currentWeekStart, "day") &&
                                 !p.date.isAfter(currentWeekEnd, "day")
-                            )
+                            ) 
                             .map(({ idx }) => idx);
-
-
-                            
 
                           if (indicesInWeek.length > 0) {
                             const firstWeekPartIdx = indicesInWeek[0];
