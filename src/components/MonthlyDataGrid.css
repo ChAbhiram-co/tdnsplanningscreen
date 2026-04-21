@@ -13,25 +13,27 @@
   margin-bottom: 10px;
   font-weight: 600;
   font-size: 22px;
-  text-align: center;
-  margin-left: 7px;
-  margin-right: 1175px;
+  margin-left: 3px;
+
+  white-space: nowrap; 
 }
 
 /* === Buttons === */
 .buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
   margin-bottom: 13px;
-  text-align: center;
-  margin-left: 52px;
   width: 750px;
+  text-align: center;
 }
 
 .buttons button {
   background: #fff;
   border: 1px solid #d9d9d9;
   border-radius: 6px;
-  padding: 8px 16px;
-  margin: 0 6px;
+  padding: 7px 14px;
+  /* margin: 0 5px; */
   font-size: 14px;
   font-weight: 500;
   color: #333;              
@@ -45,7 +47,7 @@
   color: #1890ff;
 }
 
-/* === Table === */
+
 .schedule-table {
   width: 90%;
   margin: 0 auto 3px auto;
@@ -55,14 +57,7 @@
   border: 1px solid #000; 
 }     
 
-.schedule-table th,
-.schedule-table td {
-  border: 1px solid #000;
-  text-align: center;
-  font-size: 13px;
-  padding: 6px;
-  min-width: 30px;
-}
+
 
 .schedule-table .shift-cell {
   border-left: 1px solid #ccc !important;
@@ -194,7 +189,7 @@
   color: #222;  /* dark readable text */
 }
 
-/* 🔹 Form Groups */
+/*  Form Groups */
 .form-group {
   margin-bottom: 14px;
   display: flex;
@@ -208,7 +203,7 @@
   color: #333;
 }
 
-/* 🔹 Inputs / Select */
+/*  Inputs / Select */
 .form-control,
 .ant-select-selector,
 .ant-picker {
@@ -229,7 +224,7 @@
   background: #fff;
 }
 
-/* 🔹 Buttons */
+/*  Buttons */
 .create-test-modal .ant-modal-footer {
   border-top: none;
   padding-top: 4px;
@@ -332,4 +327,66 @@
 /* Hide the slider tooltip after value is selected */
 .ant-tooltip {
   display: none !important;
+}
+/* ===== BASE GRID (LIGHT LINES) ===== */
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #ccc;   /* light lines default */
+  text-align: center;
+  font-size: 13px;
+  padding: 6px;
+  min-width: 30px;
+}
+
+/* ===== OUTER BORDER (BLACK) ===== */
+.schedule-table {
+  border: 1px solid #000;
+}
+
+/* ===== REGION & SUB COLUMNS (BLACK LINE AFTER) ===== */
+.region-col,
+.sub-col,
+.region-name,
+.sub-name {
+  border-right: 1px solid #000 !important;
+}
+
+/* ===== HEADER BOTTOM (BLACK STRONG LINE) ===== */
+.schedule-table thead tr:last-child th {
+  border-bottom: 1px solid #000 !important;
+}
+
+/* ===== SHIFT GROUP LOGIC ===== */
+
+/* default shifts → light */
+.shift-cell {
+  border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+}
+
+/* LAST SHIFT (2) → BLACK separator */
+.black-separator {
+  border-right: 1px solid #000 !important;
+}
+
+/* ===== DAY END (AFTER 3 SHIFTS) ===== */
+.schedule-table thead th[colspan] {
+  border-right: 1px solid #000 !important;
+}
+
+/* ===== REGION BLOCK SEPARATION ===== */
+tbody tr td[rowspan] {
+  border-bottom: 1px solid #000 !important;
+}
+
+/* ===== ROW LINES ===== */
+
+/* header rows → BLACK */
+.schedule-table thead th {
+  border-top: 1px solid #000;
+}
+
+/* data rows → LIGHT */
+.schedule-table tbody td {
+  border-top: 1px solid #ccc;
 }

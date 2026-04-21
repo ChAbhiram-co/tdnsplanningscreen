@@ -1419,9 +1419,9 @@
 
 // export default MonthlyDataGrid;
 
-
 import React, { useState } from "react";
-import { DatePicker, Modal, message, Slider, Radio } from "antd"; 
+import { DatePicker, Modal, message, Slider, Radio } from "antd";
+import { Stage, Layer, Rect, Text, Group } from "react-konva";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import "./MonthlyDataGrid.css";
@@ -1453,18 +1453,20 @@ const nextShiftAndDate = (shift, date) => {
   return { shift: SHIFT_ORDER[idx + 1], date };//just move to next day shift . it does not increament the day 
 };
 
-
 function MonthlyDataGrid() {
+
   const [showCalendar, setShowCalendar] = useState(false);
   const [tempRange, setTempRange] = useState([]);
   const [eventList, setEventList] = useState([]);
 
   const [daysArray, setDaysArray] = useState(() => {
-    const base = dayjs("2025-11-01");
-    return Array.from({ length: base.daysInMonth() }, (_, i) =>
-      base.date(i + 1)// creates new date
-    );
-  });
+  const base = dayjs("2026-04-01");
+  return Array.from({ length: 28 }, (_, i) =>
+    base.date(i + 1)
+  );
+});
+
+
 
   const getWeeks = (days) => {
     const weeks = [];
@@ -1473,13 +1475,13 @@ function MonthlyDataGrid() {
     }
     return weeks;
   };
-//below function appliesthe user selected range 
   const applyDateRange = () => {
     if (!tempRange || tempRange.length !== 2) {
       message.error("Please select both start and end dates");
       return;
     }
-    const [start, end] = tempRange;    let current = start.startOf("day");
+    const [start, end] = tempRange;   
+    let current = start.startOf("day");
 
     if (end.diff(start, "day") + 1 > 28) {
       message.error("Date range cannot exceed 28 days.");
@@ -1511,7 +1513,7 @@ function MonthlyDataGrid() {
     hours: "",
     shift: "",
   });
-
+  
   const handleCreateTest = () => {
     const { name, date, region, hours, shift } = testForm;
 
@@ -1577,6 +1579,10 @@ function MonthlyDataGrid() {
   const [witnessTests, setWitnessTests] = useState(new Set());
   
   const handleToggleWitness = () => {
+    if (!witnessActive && splitActive) {
+    message.error("Cannot enable Witness while Split is active");
+    return;
+  }
     setWitnessActive((prev) => !prev);
   };
 
@@ -1593,7 +1599,12 @@ function MonthlyDataGrid() {
   const [splitActive, setSplitActive] = useState(false);
 
   const handleToggleSplit = () => {
-    setSplitActive((prev) => !prev);
+     if (!splitActive && witnessActive) {
+    message.error("Cannot enable Split while Witness is active");
+    return;
+  }
+    setSplitActive((prev) =>!prev);
+
   };
 
   const [splitModalVisible, setSplitModalVisible] = useState(false);
@@ -1684,65 +1695,70 @@ function MonthlyDataGrid() {
     );
   };
 
-  const [dragModalVisible, setDragModalVisible] = useState(false);
-  const [eventToMove, setEventToMove] = useState(null);
-  const [dragForm, setDragForm] = useState({
-    date: null,
-    region: "",
-    shift: "",
-  });
+  const [draggingEvent, setDraggingEvent] = useState(null);
+const handleDrop = (dropDate, regionName, subItemName, shiftNum) => {
+  console.log("Dropped on:", dropDate.format("YYYY-MM-DD"), regionName, subItemName, shiftNum);
+  console.log("Dragging event:", draggingEvent);
 
-  const handleEventDoubleClick = (mergedEvent) => {
-    const p0 = mergedEvent.parts[0];
-    setEventToMove(mergedEvent);
-    setDragForm({
-      date: p0.date,
-      region: `${p0.region}-${p0.subItem}`,
-      shift: String(p0.shift),
-    });
-    setDragModalVisible(true);
-  };
+  if (!draggingEvent) {
+    console.log("❌ No dragging event");
+    return;
+  }
+  setEventList((prev) =>
+    prev.map((ev) => {
+      if (ev === draggingEvent._original || ev === draggingEvent) {
+        let newParts = [];
+        let curDate = dropDate.startOf("day");
+        let curShift = shiftNum;
 
-  const handleApplyDragDrop = () => {
-    if (!eventToMove) return;
+        for (let i = 0; i < ev.parts.length; i++) {
+          newParts.push({
+            ...ev.parts[i],
+            date: curDate,
+            shift: curShift,
+            region: regionName,
+            subItem: subItemName,
+          });
 
-    const { date, region, shift } = dragForm;
-    if (!date || !region || !shift) {
-      message.error("Please fill all fields before applying.");
-      return;
-    }
-
-    const [regionName, subItemName] = region.split("-");
-    const shiftNum = Number(shift);
-
-    setEventList((prev) =>
-      prev.map((ev) => {
-        if (ev === eventToMove._original || ev === eventToMove) {
-          let newParts = [];
-          let curDate = date.startOf("day");
-          let curShift = shiftNum;
-          for (let i = 0; i < ev.parts.length; i++) {
-            newParts.push({ ...ev.parts[i], date: curDate,shift: curShift, region: regionName, subItem: subItemName,
-            });
-            const next = nextShiftAndDate(curShift, curDate);
-            curDate = next.date;
-            curShift = next.shift;
-          }
-          return { ...ev, parts: newParts };
+          const next = nextShiftAndDate(curShift, curDate);
+          curDate = next.date;
+          curShift = next.shift;
         }
-        return ev;
-      })
-    );
 
-    setDragModalVisible(false);
-    setEventToMove(null);
-    message.success("✅ Event moved successfully!");
-  };
+        return { ...ev, parts: newParts };
+      }
+      return ev;
+    })
+  );
 
+  setDraggingEvent(null);
+  message.success("✅ Event moved successfully!");
+};
+
+
+  const getMonthTitle = () => {
+  if (!daysArray.length) return "Monthly Data";
+
+  const firstMonth = daysArray[0].format("MMMM");
+  const lastMonth = daysArray[daysArray.length - 1].format("MMMM");
+
+  if (firstMonth === lastMonth) {
+    return `${firstMonth} Monthly Data`;
+  }
+
+  return `${firstMonth} - ${lastMonth} Monthly Data`;
+};
+
+const cellWidth = 60;
+const cellHeight = 45;
+const headerHeight = 60;
+
+const totalCols = 2 + (daysArray.length * shifts.length);
+const stageWidth = totalCols * cellWidth;
+const stageHeight = regions.length * 3 * cellHeight + 120;
   return (
     <div className="monthly-grid-container">
-      <h2 className="title">Monthly Data</h2>
-      <div className="buttons">
+ <div className="buttons">
         <button
           onClick={handleToggleWitness}
           style={{ position: "relative", paddingRight: "20px" }}
@@ -1763,7 +1779,8 @@ function MonthlyDataGrid() {
         <button onClick={() => setShowCreateTest(true)}>Create Test</button>
         <button>Delete Test</button>
       </div>
-
+      <h2 className="title">{getMonthTitle()}</h2>
+     
       <Modal
         title="Select Date Range"
         open={showCalendar}
@@ -1774,9 +1791,9 @@ function MonthlyDataGrid() {
         <RangePicker
           value={tempRange}
           onChange={(values) => setTempRange(values || [])}
-          defaultPickerValue={[dayjs("2025-08-01"), dayjs("2025-08-01")]}
+          defaultPickerValue={[dayjs("2026-03-01"), dayjs("2026-03-01")]}
           disabledDate={(current) =>
-            current && current.isBefore(dayjs("2025-08-01"), "day")
+            current && current.isBefore(dayjs("2026-02-01"), "day")
           }
         />
       </Modal>
@@ -1918,359 +1935,284 @@ function MonthlyDataGrid() {
         </div>
       </Modal>
 
-      <Modal
-        title={
-          eventToMove
-            ? `Move "${eventToMove.parts[0].label || eventToMove.parts[0].test}" to…`
-            : "Move Event"
-        }
-        open={dragModalVisible}
-        onOk={handleApplyDragDrop}
-        onCancel={() => setDragModalVisible(false)}
-        okText="Apply"
-        cancelText="Cancel"
-      >
-        <div className="form-group">
-          <label>Date to Drag and Drop</label>
-          <DatePicker
-            value={dragForm.date}
-            onChange={(val) => setDragForm({ ...dragForm, date: val })}
-            style={{ width: "100%" }}
-          />
-        </div>
 
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Region</label>
-          <select
-            className="form-control"
-            value={dragForm.region}
-            onChange={(e) => setDragForm({ ...dragForm, region: e.target.value })}
-          >
-            <option value="">Select Region</option>
-            {regions.map((reg) => (
-              <optgroup key={reg.name} label={reg.name}>
-                {reg.subItems.map((sub) => (
-                  <option key={`${reg.name}-${sub}`} value={`${reg.name}-${sub}`}>
-                    {sub}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
+{weeks.map((weekDays, weekIdx) => {
+  const cellWidth = 60;
+  const cellHeight = 45;
 
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Shift</label>
-          <select
-            className="form-control"
-            value={dragForm.shift}
-            onChange={(e) => setDragForm({ ...dragForm, shift: e.target.value })}
-          >
-            <option value="">Select Shift</option>
-            <option value="3">3</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-          </select>
-        </div>
-      </Modal>
+  const headerRow1 = 30;
+  const headerRow2 = 30;
+  const headerRow3 = 30;
 
-      {weeks.length > 0 ? (
-        weeks.map((weekDays, weekIdx) => (
-          <table className="schedule-table" key={weekIdx}>
-            <thead>
-              <tr>
-                <th rowSpan="3" className="region-col">
-                  Region
-                </th>
-                <th rowSpan="3" className="sub-col">
-                  Sub Item
-                </th>
-                {weekDays.map((d, i) => (
-                  <th key={i} colSpan={shifts.length} className="day-header">
-                    {d.format("dddd")}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                {weekDays.map((d, i) => (
-                  <th key={i} colSpan={shifts.length} className="date-cell">
-                    {d.format("DD-MM")}
-                  </th>
-                ))}
-              </tr>
-              <tr className="shift-row">
-                {weekDays.map((_, i) =>
-                  shifts.map((s, idx) => (
-                    <th
-                      key={`${i}-${s}`}
-                      className={`shift-cell ${idx === 2 ? "black-separator" : ""}`}
-                    >
-                      {s}
-                    </th>
-                  ))
-                )}
-              </tr>
-            </thead>
+  const headerHeight = headerRow1 + headerRow2 + headerRow3;
 
-            <tbody>
-              {regions.map((region) =>
-                region.subItems.map((sub, i) => (
-                  <tr key={`${region.name}-${sub}`}>
-                    {i === 0 && (
-                      <td rowSpan={region.subItems.length} className="region-name">
-                        {region.name}
-                      </td>
-                    )}
-                    <td className="sub-name">{sub}</td>
+  const totalCols = 2 + weekDays.length * 3;
+  const totalRows = regions.reduce((s, r) => s + r.subItems.length, 0);
 
-                    {weekDays.map((d, dayIdx) =>
-                      shifts.map((s, shiftIdx) => {
-                        let mergedEvent = null;
+  const stageWidth = totalCols * cellWidth;
+  const stageHeight = headerHeight + totalRows * cellHeight;
 
-                        const evContaining = eventList.find((ev) =>
-                          ev.merged &&
-                          ev.parts.some(
-                            (p) =>
-                              p.date.isSame(d, "day") &&
-                              p.shift === s &&
-                              p.region === region.name &&
-                              p.subItem === sub
-                          )
-                        );
+  return (
+     <div style={{ marginBottom: "20px" }}>
+    <Stage width={stageWidth} height={stageHeight} key={weekIdx}>
+      <Layer>
 
-                        if (evContaining) {
-                          const currentWeekStart = weekDays[0];
-                          const currentWeekEnd = weekDays[weekDays.length - 1];
-                          const indicesInWeek = evContaining.parts
-                            .map((p, idx) => ({ p, idx }))
-                            .filter(
-                              ({ p }) =>
-                                !p.date.isBefore(currentWeekStart, "day") &&
-                                !p.date.isAfter(currentWeekEnd, "day")
-                            ) 
-                            .map(({ idx }) => idx);
+      
 
-                          if (indicesInWeek.length > 0) {
-                            const firstWeekPartIdx = indicesInWeek[0];
-                            const lastWeekPartIdx = indicesInWeek[indicesInWeek.length - 1];
+        {/* REGION */}
+        <Rect x={0} y={0} width={cellWidth} height={headerHeight} fill="#fafafa" />
+        <Text x={0} y={0} width={cellWidth} height={headerHeight} text="Region" align="center" verticalAlign="middle" fontStyle="bold" />
 
-                            const currentPartIndex = evContaining.parts.findIndex(
-                              (p) =>
-                                p.date.isSame(d, "day") &&
-                                p.shift === s &&
-                                p.region === region.name &&
-                                p.subItem === sub
-                            );
+        {/* SUB ITEM */}
+        <Rect x={cellWidth} y={0} width={cellWidth} height={headerHeight} fill="#fafafa" />
+        <Text x={cellWidth} y={0} width={cellWidth} height={headerHeight} text="Sub Item" align="center" verticalAlign="middle" fontStyle="bold" />
 
-                            if (currentPartIndex === firstWeekPartIdx) {
-                              const partsFromHere = evContaining.parts.slice(
-                                firstWeekPartIdx,
-                                lastWeekPartIdx + 1
-                              );
-                              mergedEvent = { ...evContaining, parts: partsFromHere, _original: evContaining };
-                            }
-                          }
-                        }
+        {/* DAYS */}
+        {weekDays.map((d, i) => {
+          const baseX = (2 + i * 3) * cellWidth;
 
-                        if (mergedEvent) {
-                          const totalCells = mergedEvent.parts.length;
-                          const totalHours = mergedEvent.parts.reduce(
-                            (sum, p) => sum + p.hours,
-                            0
-                          );
-                          const firstPart = mergedEvent.parts[0];
+          return (
+            <Group key={i}>
+              {/* DAY */}
+              <Rect x={baseX} y={0} width={cellWidth * 3} height={30} fill="#f5f5f5" />
+              <Text x={baseX} y={0} width={cellWidth * 3} height={30} text={d.format("dddd")} align="center" verticalAlign="middle" />
 
-                          const lastPart =
-                            mergedEvent.parts[mergedEvent.parts.length - 1];
-                          const coversShift2 = lastPart && lastPart.shift === 2;
+              {/* DATE */}
+              <Rect x={baseX} y={30} width={cellWidth * 3} height={30} fill="#fafafa" />
+              <Text x={baseX} y={30} width={cellWidth * 3} height={30} text={d.format("DD-MM")} align="center" verticalAlign="middle" />
 
-                          const originalEv = mergedEvent._original || mergedEvent;
-                          const eventKey = `${region.name}-${sub}-${originalEv.parts[0].date.format(
-                            "YYYY-MM-DD"
-                          )}-${originalEv.parts[0].test}`;
+              {/* SHIFT */}
+              {shifts.map((s, idx) => {
+                const x = baseX + idx * cellWidth;
 
-                          const isSplit = Boolean(originalEv.split);
-                          const splitAtGlobal = originalEv.splitAt ?? null;
+                return (
+                  <Group key={idx}>
+                    <Rect x={x} y={60} width={cellWidth} height={30} fill="#fff" />
+                    <Text x={x} y={60} width={cellWidth} height={30} text={String(s)} align="center" verticalAlign="middle" />
+                  </Group>
+                );
+              })}
+            </Group>
+          );
+        })}
 
-                          let shouldRenderSplitHere = false;
-                          let leftPct = 50;
-                          let rightPct = 50;
+     
 
-                          if (isSplit && splitAtGlobal != null) {
-                            const idxInOriginal = originalEv.parts.findIndex(
-                              (p) =>
-                                p.date.isSame(firstPart.date, "day") &&
-                                p.shift === firstPart.shift &&
-                                p.region === firstPart.region &&
-                                p.subItem === firstPart.subItem &&
-                                p.test === firstPart.test
-                            );
-                            let prefixHours = 0;
-                            for (let k = 0; k < idxInOriginal; k++) {
-                              prefixHours += originalEv.parts[k].hours;
-                            }
-                            const sliceHours = mergedEvent.parts.reduce((s, p) => s + p.hours, 0);
+        {(() => {
+          let rowCounter = 0;
 
-                            if (splitAtGlobal > prefixHours && splitAtGlobal < prefixHours + sliceHours) {
-                              shouldRenderSplitHere = true;
-                              const localSplitHours = splitAtGlobal - prefixHours;
-                              leftPct = (localSplitHours / sliceHours) * 100;
-                              rightPct = 100 - leftPct;
-                            } else {
-                              shouldRenderSplitHere = false;
-                            }
-                          }
+          return regions.map((region) =>
+            region.subItems.map((sub, sIdx) => {
+              const rowY = headerHeight + rowCounter * cellHeight;
+              const isFirst = sIdx === 0;
 
-                          if (isSplit && shouldRenderSplitHere) {
-                            const colorLeft = mergedEvent.parts[0].color;
-                            const colorRight = mergedEvent.parts[0].color;
+              const group = (
+                <Group key={`${region.name}-${sub}`}>
 
-                            const leftKey = `${eventKey}-left`;
-                            const rightKey = `${eventKey}-right`;
+                  {/* REGION (ROWSPAN) */}
+                  {isFirst && (
+                    <>
+                      <Rect
+                        x={0}
+                        y={rowY}
+                        width={cellWidth}
+                        height={cellHeight * region.subItems.length}
+                        fill="#fafafa"
+                      />
+                      <Text
+                        x={0}
+                        y={rowY}
+                        width={cellWidth}
+                        height={cellHeight * region.subItems.length}
+                        text={region.name}
+                        align="center"
+                        verticalAlign="middle"
+                        fontStyle="bold"
+                      />
+                    </>
+                  )}
 
-                            return (
-                              <td
-                                key={`${dayIdx}-${s}`}
-                                colSpan={totalCells}
-                                className={`cell shift-cell ${coversShift2 ? "black-separator" : ""}`}
-                                style={{ padding: 0 }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    width: `${(totalHours / (8 * totalCells)) * 100}%`,
-                                    height: "100%",
-                                  }}
-                                  onDoubleClick={() => handleEventDoubleClick(mergedEvent)}
-                                >
-                                  <div
-                                    onClick={() => {
-                                      if (witnessActive) handleToggleStar(leftKey);
-                                      if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                    }}
-                                    style={{
-                                      width: `${leftPct}%`,
-                                      height: "100%",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundColor: colorLeft,
-                                      boxSizing: "border-box",
-                                      textAlign: "center",
-                                      borderRadius: "4px",
-                                      cursor:
-                                        witnessActive || splitActive ? "pointer" : "default",
-                                    }}
-                                  >
-                                    <span className="event-text">
-                                      {firstPart.label}
-                                      {witnessTests.has(leftKey) && (
-                                        <span className="event-star">⭐</span>
-                                      )}
-                                    </span>
-                                  </div>
+                  {/* SUB ITEM */}
+                  <Rect x={cellWidth} y={rowY} width={cellWidth} height={cellHeight} fill="#fff" />
+                  <Text
+                    x={cellWidth + 6}
+                    y={rowY}
+                    width={cellWidth - 6}
+                    height={cellHeight}
+                    text={sub}
+                    verticalAlign="middle"
+                  />
 
-                                  <div
-                                    onClick={() => {
-                                      if (witnessActive) handleToggleStar(rightKey);
-                                      if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                    }}
-                                    style={{
-                                      width: `${rightPct}%`,
-                                      height: "100%",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundColor: colorRight,
-                                      boxSizing: "border-box",
-                                      textAlign: "center",
-                                      borderRadius: "4px",
-                                      borderLeft: "1px solid black",
-                                      cursor:
-                                        witnessActive || splitActive ? "pointer" : "default",
-                                    }}
-                                  >
-                                    <span className="event-text">
-                                      {firstPart.label}
-                                      {witnessTests.has(rightKey) && (
-                                        <span className="event-star">⭐</span>
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                              </td>
-                            );
-                          }
+                  {/* GRID CELLS */}
+                  {weekDays.map((_, dayIdx) =>
+                    shifts.map((_, shiftIdx) => {
+                      const colIndex = 2 + dayIdx * 3 + shiftIdx;
 
-                          return (
-                            <td
-                              key={`${dayIdx}-${s}`}
-                              colSpan={totalCells}
-                              className={`cell shift-cell ${
-                                coversShift2 ? "black-separator" : ""
-                              }`}
-                            >
-                              <div
-                                className="event-block"
-                                style={{
-                                  backgroundColor: firstPart.color,
-                                  color: "black",
-                                  height: "100%",
-                                  width: `${(totalHours / (8 * totalCells)) * 100}%`,
-                                  textAlign: "left",
-                                  cursor:
-                                    witnessActive || splitActive ? "pointer" : "default",
-                                }}
-                                onClick={() => {
-                                  if (witnessActive) handleToggleStar(eventKey);
-                                  if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                }}
-                                onDoubleClick={() => handleEventDoubleClick(mergedEvent)}
-                              >
-                                <span className="event-text">
-                                  {firstPart.label}
-                                  {witnessTests.has(eventKey) && (
-                                    <span className="event-star">⭐</span>
-                                  )}
-                                </span>
-                              </div>
-                            </td>
-                          );
-                        }
+                      return (
+                        <Rect
+                          key={`${dayIdx}-${shiftIdx}`}
+                          x={colIndex * cellWidth}
+                          y={rowY}
+                          width={cellWidth}
+                          height={cellHeight}
+                          fill="#fff"
+                        />
+                      );
+                    })
+                  )}
+                </Group>
+              );
 
-                        const insideSpan = eventList.some(
-                          (ev) =>
-                            ev.merged &&
-                            ev.parts.some(
-                              (p) =>
-                                p.date.isSame(d, "day") &&
-                                p.shift === s &&
-                                p.region === region.name &&
-                                p.subItem === sub
-                            )
-                        );
-                        if (insideSpan) return null;
+              rowCounter++;
+              return group;
+            })
+          );
+        })()}
 
-                        return (
-                          <td
-                            key={`${dayIdx}-${s}`}
-                            className={`cell shift-cell ${
-                              shiftIdx === 2 ? "black-separator" : ""
-                            }`}
-                          />
-                        );
-                      })
-                    )}
-                  </tr>
-                ))
+        <Rect x={0} y={0} width={stageWidth} height={stageHeight} stroke="#000" />
+
+      
+        {Array.from({ length: totalCols + 1 }).map((_, col) => {
+          const x = col * cellWidth;
+
+          let show = false;
+
+          if (col === 0 || col === 1 || col === 2 || col === totalCols) show = true;
+          if ((col - 2) % 3 === 0 && col >= 2) show = true;
+
+          if (!show) return null;
+
+          return (
+            <Rect
+              key={`hv-${col}`}
+              x={x}
+              y={0}
+              width={1}
+              height={headerRow1 + headerRow2}
+              fill="#000"
+            />
+          );
+        })}
+
+        
+        {Array.from({ length: totalCols + 1 }).map((_, col) => {
+          const x = col * cellWidth;
+
+          let color = "#ccc";
+
+          if (col === 0 || col === 1 || col === totalCols) color = "#000";
+          if ((col - 2) % 3 === 0 && col >= 2) color = "#000";
+
+          return (
+            <Rect
+              key={`v-${col}`}
+              x={x}
+              y={headerRow1 + headerRow2} // start at shift row
+              width={1}
+              height={stageHeight - (headerRow1 + headerRow2)}
+              fill={color}
+            />
+          );
+        })}
+
+        {/* ================= HORIZONTAL LINES ================= */}
+        {Array.from({ length: totalRows + 4 }).map((_, i) => {
+          let y;
+
+          if (i === 0) y = 0;
+          else if (i === 1) y = 30;
+          else if (i === 2) y = 60;
+          else if (i === 3) y = 90;
+          else y = headerHeight + (i - 4) * cellHeight;
+
+          let rowIndex = i - 4;
+          if (rowIndex < 0) rowIndex = -1;
+
+          let cumulative = 0;
+          let isRegionEnd = false;
+
+          for (let r of regions) {
+            cumulative += r.subItems.length;
+            if (rowIndex === cumulative) isRegionEnd = true;
+          }
+
+          return (
+            <Group key={`h-${i}`}>
+              {/* HEADER */}
+              {i <= 3 && (
+                <>
+                  {/* SHIFT FULL WIDTH */}
+                  {i === 3 && (
+                    <Rect x={0} y={y} width={stageWidth} height={1} fill="#000" />
+                  )}
+
+                  {/* OTHER HEADER LINES */}
+                  {i !== 3 && (
+                    <Rect
+                      x={cellWidth * 2}
+                      y={y}
+                      width={stageWidth - (cellWidth * 2)}
+                      height={1}
+                      fill="#000"
+                    />
+                  )}
+                </>
               )}
-            </tbody>
-          </table>
-        ))
-      ) : (
-        <p>No dates to show</p>
-      )}
+              
+
+              {/* REGION END */}
+              {i > 3 && isRegionEnd && (
+                <Rect
+                 x={0}
+                 y={y }
+                 width={stageWidth} 
+                 height={1} 
+                 fill="#000" />
+              )}
+              
+
+            
+        
+             {i > 3 && !isRegionEnd && (
+  <Rect
+    x={i === 4 ? 0 : cellWidth}   
+    y={y}
+    width={i === 4 ? stageWidth : stageWidth - cellWidth}
+    height={1}
+    fill={i === 4 ? "#000" : "#ccc"}
+  
+  />
+)}
+
+<Rect
+  x={0}
+  y={stageHeight - 1}   
+  width={stageWidth}
+  height={1}
+  stroke="#000"           
+  strokeWidth={1}
+/>
+            </Group>
+          );
+        })}
+
+      </Layer>
+    </Stage>
+     </div>
+  );
+})}
+   
+
+
+
+
+
+
+
+
+
     </div>
+   
   );
 }
 export default MonthlyDataGrid;
