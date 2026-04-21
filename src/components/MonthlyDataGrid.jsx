@@ -1479,8 +1479,7 @@ function MonthlyDataGrid() {
       message.error("Please select both start and end dates");
       return;
     }
-    const [start, end] = tempRange;
-    let current = start.startOf("day");
+    const [start, end] = tempRange;    let current = start.startOf("day");
 
     if (end.diff(start, "day") + 1 > 28) {
       message.error("Date range cannot exceed 28 days.");
@@ -1571,7 +1570,7 @@ function MonthlyDataGrid() {
 
     setEventList((prev) => [...prev, { merged: true, parts: toAdd }]);
     setShowCreateTest(false);
-    setTestForm({ name: "", date: null, region: "", hours: "", shift: "" });// here resetting the form
+    setTestForm({ name: "", date: null, region: "", hours: "", shift: "" });
   };
 
   const [witnessActive, setWitnessActive] = useState(false);
@@ -2039,11 +2038,9 @@ function MonthlyDataGrid() {
                           )
                         );
 
-
                         if (evContaining) {
                           const currentWeekStart = weekDays[0];
                           const currentWeekEnd = weekDays[weekDays.length - 1];
-
                           const indicesInWeek = evContaining.parts
                             .map((p, idx) => ({ p, idx }))
                             .filter(
