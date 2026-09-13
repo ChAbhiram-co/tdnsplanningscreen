@@ -1,11 +1,19 @@
 .monthly-grid-container {
   font-family: "Poppins", Arial, sans-serif;
-  padding: 30px;
+
+  padding-top: 50px;
+  padding-left: 50px;
+  padding-bottom: 50px;
+  padding-right: 48px;
+
   box-sizing: border-box;
   background: #f8f9fb;
   color: #333;
   position: relative;
-  min-width: 1513px;
+  min-width: 1519px;
+ 
+
+  overflow-x: hidden;
 }
 
 .monthly-grid-container h2 {
@@ -24,7 +32,7 @@
   justify-content: flex-start;
   gap: 8px;
   margin-bottom: 13px;
-  width: 750px;
+  width: 1300px;
   text-align: center;
 }
 
@@ -205,15 +213,17 @@
 
 /*  Inputs / Select */
 .form-control,
-.ant-select-selector,
 .ant-picker {
-  padding: 8px 10px !important;
-  border-radius: 6px !important;
-  border: 1px solid #ccc !important;
-  font-size: 13px;
-  background: #fafafa;
-  color: #222 !important;
-  transition: all 0.25s ease;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ccc !important;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+/* Don't style every Select globally */
+.ant-select .ant-select-selector{
+    border-radius:6px !important;
 }
 
 .form-control:focus,
@@ -296,7 +306,7 @@
   white-space: nowrap;    /* keep inline clean */
 }
 
-/* ✅ When the container is narrow, stack vertically */
+
 .event-text {
   flex-direction: row;    /* default inline */
 }
@@ -389,4 +399,151 @@ tbody tr td[rowspan] {
 /* data rows → LIGHT */
 .schedule-table tbody td {
   border-top: 1px solid #ccc;
+}
+.ant-select-selection-placeholder {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+ 
+
+ 
+
+
+
+}
+.buttons .ant-select-selector {
+  min-height: 40px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  padding: 1px 16px 2px 8px !important;
+}
+
+.ant-select-multiple.ant-select-lg .ant-select-selector {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding-top: 2px !important;
+  overflow: hidden !important;
+}
+
+.ant-select-selection-placeholder {
+  line-height: 32px !important;
+}
+
+/* ===========================
+   PRINT LAYOUT
+=========================== */
+
+@media print {
+
+  body {
+    margin: 0;
+    background: white;
+  }
+
+  /* Hide everything */
+
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show planner only */
+
+  #planner-print-area,
+  #planner-print-area * {
+    visibility: visible;
+  }
+
+  #planner-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+}
+
+.add-transformer-modal .ant-modal-content{
+    width:450px;
+    min-height:158px;
+    padding:0;
+    border-radius:0;
+}
+
+/* Header */
+.add-transformer-modal .ant-modal-header{
+    height:48px;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    margin:0;
+    border-bottom:1px solid #f0f0f0;
+    background:#fff;
+}
+
+.add-transformer-modal .ant-modal-title{
+    font-size:15px;
+    font-weight:600;
+}
+
+
+/* Body */
+.add-transformer-modal .ant-modal-body{
+    padding:18px 28px 18px 34px;
+    min-height:55px;
+}
+
+/* Footer */
+.add-transformer-modal .ant-modal-footer{
+    margin:0;
+    height: 48px;
+
+    padding:8px 20px;
+    border-top:1px solid #f0f0f0;
+    background:#fff;
+}
+/* Let multiple Select grow naturally */
+.add-transformer-modal
+.ant-select-multiple
+.ant-select-selector{
+    min-height:32px !important;
+    height:auto !important;
+    align-items:flex-start !important;
+    padding-top:3px !important;
+    padding-bottom:3px !important;
+}
+.split-task-select .ant-select-arrow {
+  margin-bottom: 1px;
+  margin-top: 1px;
+  font-size: 10px;
+}
+
+.transformer-section{
+  margin-top:15mm;
+  width:100%;
+  text-align:center;
+  line-height:1.1;
+
+}
+
+.transformer-details{
+  
+  width:100%;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  text-align:center;
+  margin-top: 12px;
+}
+
+.transformer-item{
+  display:inline;
+  font-weight:bold;
+  
+}
+
+.transformer-separator{
+  display:inline;
+  margin:0 2px;
 }
