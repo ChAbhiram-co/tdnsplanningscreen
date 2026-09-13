@@ -1273,7 +1273,6 @@ setDraggingEvent(null);
 
 return;
 }
-// SOUND TEST LMS RESTRICTION
 if (
   draggingEvent.test === "Sound Test" &&
   draggingEvent.subItem === "LMS" &&
@@ -1287,7 +1286,7 @@ return;
 
 setEventList((prev) => {
 
-    // Normal event
+
     if (!draggingEvent.groupId) {
 
       return prev.map((ev) =>
@@ -1303,9 +1302,6 @@ setEventList((prev) => {
     );
 
 }
-// -------------------------
-// GROUP DRAG
-// -------------------------
 
 const draggedDayIndex =
 daysArray.findIndex(d =>
@@ -1348,7 +1344,6 @@ const newEventList = prev.map(ev => {
       return ev;
     }
 
-  // ROW OFFSET
   const eventWeek =
   Math.floor(
     daysArray.findIndex(d =>
@@ -1392,10 +1387,6 @@ finalWeek = Math.max(
   )
 );
 
-//---------------------------------------
-// HORIZONTAL MOVE
-//---------------------------------------
-
 const eventDay =
 daysArray.findIndex(d =>
   d.isSame(ev.startDate, "day")
@@ -1424,10 +1415,6 @@ finalDay = Math.max(
     finalDay
   )
 );
-
-//---------------------------------------
-// WEEK CORRECTION
-//---------------------------------------
 
 const dayInsideWeek =
 finalDay % 7;
@@ -1471,9 +1458,6 @@ newEventList.filter(
   ev.groupId ===
   draggingEvent.groupId
 );
-//--------------------------------------------------
-// GROUP BLOCKED CELL VALIDATION
-//--------------------------------------------------
 
 const hasBlockedCell =
 finalGroupEvents.some(groupEvent => {
@@ -1530,9 +1514,6 @@ dragInfoRef.current = null;
 return prev;
 
 }
-//--------------------------------------------------
-// GROUP OVERLAP VALIDATION
-//--------------------------------------------------
 
 const hasGroupOverlap =
 finalGroupEvents.some(groupEvent => {
@@ -1546,14 +1527,12 @@ finalGroupEvents.some(groupEvent => {
 
   return prev.some(existingEvent => {
 
-      // Ignore own group
       if (
         existingEvent.groupId === draggingEvent.groupId
       ) {
       return false;
     }
 
-  // Different row
   if (
     existingEvent.region !== groupEvent.region ||
     existingEvent.subItem !== groupEvent.subItem
@@ -1658,10 +1637,6 @@ daysArray.length
 const modifiedDate =
 dayjs().format("DD-MM-YYYY HH:mm");
 
-// ----------------------------------------
-// TRANSFORMER + CUSTOMER DATA FOR PRINT
-// ----------------------------------------
-
 const printTransformerMap = {};
 
 eventList.forEach((event) => {
@@ -1670,7 +1645,6 @@ eventList.forEach((event) => {
       return;
     }
 
-  // Keep only the first occurrence
   if (!printTransformerMap[event.transformer]) {
 
     printTransformerMap[event.transformer] = {
@@ -1874,7 +1848,6 @@ const handleSplitTask = (percentage) => {
       "Please select exactly one event to split."
     );
 
-  // Reset dropdown because split did not happen
   setSplitPercentage(null);
 
   return;
@@ -1925,7 +1898,6 @@ const part1Hours =
 totalHours *
 (percentage / 100);
 
-// 6. PART 2
 const part2Hours =
 totalHours -
 part1Hours;
@@ -1952,10 +1924,6 @@ let part2Offset = Number(
 
 let remainingHours = part1Hours;
 
-// -----------------------------------------
-// Find current shift
-// -----------------------------------------
-
 let currentShiftIndex = Math.floor(
   part2Offset / cellWidth
 );
@@ -1968,10 +1936,6 @@ currentShiftIndex = Math.max(
   )
 );
 
-// -----------------------------------------
-// Hours already consumed inside current shift
-// -----------------------------------------
-
 const offsetInsideShift =
 part2Offset -
 currentShiftIndex * cellWidth;
@@ -1982,17 +1946,8 @@ const hoursInsideCurrentShift =
   cellWidth
 ) * 8;
 
-// -----------------------------------------
-// Remaining hours in current shift
-// -----------------------------------------
-
 let availableHours =
 8 - hoursInsideCurrentShift;
-
-// -----------------------------------------
-// CASE 1:
-// Part 2 still starts in current shift
-// -----------------------------------------
 
 if (
   remainingHours <= availableHours
@@ -2008,11 +1963,6 @@ remainingHours = 0;
 
 }
 
-// -----------------------------------------
-// CASE 2:
-// Part 1 continues into later shifts
-// -----------------------------------------
-
 else {
 
   remainingHours -= availableHours;
@@ -2020,7 +1970,6 @@ else {
   let currentShift =
   SHIFT_ORDER[currentShiftIndex];
 
-  // Move to next shift
   while (remainingHours > 0) {
 
     const next =
@@ -2037,10 +1986,6 @@ else {
     currentShift
   );
 
-// -------------------------------------
-// Part 2 begins inside this shift
-// -------------------------------------
-
 if (remainingHours < 8) {
 
   part2Offset =
@@ -2054,15 +1999,8 @@ remainingHours = 0;
 
 break;
 }
-
-// -------------------------------------
-// Entire shift consumed
-// -------------------------------------
-
 remainingHours -= 8;
 
-// If exactly consumed the shift,
-// part2 begins at the next shift.
 if (remainingHours === 0) {
 
   const following =
@@ -2090,10 +2028,6 @@ break;
 }
 }
 }
-
-// -----------------------------------------
-// CREATE PART 1
-// -----------------------------------------
 
 const timestamp = Date.now();
 
@@ -2135,10 +2069,6 @@ const part2 = {
   null,
 };
 
-// -----------------------------------------
-// REPLACE ORIGINAL
-// -----------------------------------------
-
 setEventList(prev => {
 
     const updatedEvents =
@@ -2164,23 +2094,11 @@ console.log(
 return updatedEvents;
 });
 
-// -----------------------------------------
-// CLEAR EVENT SELECTION
-// -----------------------------------------
-
 setSelectedEvents(
   new Set()
 );
 
-// -----------------------------------------
-// RESET DROPDOWN
-// -----------------------------------------
-
 setSplitPercentage(null);
-
-// -----------------------------------------
-// SUCCESS
-// -----------------------------------------
 
 message.success(
   `Task split into ${part1Hours}h + ${part2Hours}h`
@@ -2198,16 +2116,6 @@ const handleBlock = () => {
 
   if (!blockSelectionActive) return;
 
-  /*
-  ============================================================
-  EXACT EVENT OCCUPANCY CALCULATION
-  ============================================================
-
-  Each cell = 8 hours.
-
-  We calculate the event as a continuous timeline.
-  */
-
   const occupiedCellKeys = new Set();
 
   eventList.forEach((ev) => {
@@ -2217,11 +2125,6 @@ const handleBlock = () => {
 
       if (duration <= 0) return;
 
-      /*
-      ------------------------------------------------------------
-      EVENT START
-      ------------------------------------------------------------
-      */
 
       const startShiftIndex = Math.max(
         0,
@@ -2233,33 +2136,15 @@ const handleBlock = () => {
           )
       )
   );
-
-/*
-startOffset can be inside a cell.
-Convert pixel offset into hours.
-*/
-
 const startHourInsideDay =
 (
   Number(ev.startOffset || 0) /
   cellWidth
 ) * 8;
 
-/*
-------------------------------------------------------------
-EVENT END
-------------------------------------------------------------
-*/
-
 const endHour =
 startHourInsideDay +
 duration;
-
-/*
-------------------------------------------------------------
-CHECK EVERY CELL OF THE EVENT'S DATE RANGE
-------------------------------------------------------------
-*/
 
 const startDate =
 ev.startDate.startOf("day");
@@ -2281,12 +2166,6 @@ startDate.add(
   "day"
 );
 
-/*
-----------------------------------------------------------
-EVENT TIMELINE FOR THIS DAY
-----------------------------------------------------------
-*/
-
 const dayStartHour =
 dayOffset * 24;
 
@@ -2307,9 +2186,6 @@ Math.min(
   dayStartHour
 );
 
-/*
-No event in this day.
-*/
 
 if (
   eventEndInDay <=
@@ -2317,12 +2193,6 @@ if (
 ) {
 continue;
 }
-
-/*
-----------------------------------------------------------
-CHECK ALL 3 CELLS
-----------------------------------------------------------
-*/
 
 for (
   let shiftIdx = 0;
@@ -2335,12 +2205,6 @@ shiftIdx * 8;
 
 const cellEndHour =
 cellStartHour + 8;
-
-/*
---------------------------------------------------------
-ACTUAL OVERLAP
---------------------------------------------------------
-*/
 
 const overlapStart =
 Math.max(
@@ -2361,12 +2225,6 @@ Math.max(
   overlapStart
 );
 
-/*
---------------------------------------------------------
-ANY OCCUPANCY = CELL CANNOT BE BLOCKED
----------------------------------------------------
-*/
-
 if (occupiedHours > 0) {
 
   const cellKey =
@@ -2383,12 +2241,6 @@ if (occupiedHours > 0) {
 
 });
 
-/*
-============================================================
-NOW BLOCK ONLY COMPLETELY EMPTY SELECTED CELLS
-============================================================
-*/
-
 const cellsToBlock = {};
 
 const selectedKeys =
@@ -2397,11 +2249,6 @@ Object.keys(
 );
 
 selectedKeys.forEach((cellKey) => {
-
-    /*
-    If the event occupies even 1 hour,
-    this cell is NOT allowed to be blocked.
-    */
 
     if (
       !occupiedCellKeys.has(cellKey)
@@ -2471,8 +2318,6 @@ setIsSelectingBlocks(false);
 };
 
 const getMonthTitle = () => {
-  // We add a guard clause to prevent accessing
-  // undefined values when no dates are selected
   if (!daysArray.length) return "Monthly Data";
 
   const firstMonth = daysArray[0].format("MMMM");
@@ -2492,7 +2337,6 @@ return `${firstMonth} - ${lastMonth} Monthly Data${versionText}`;
 };
 const handleRemoveTransformer = (transformer) => {
 
-  // Check whether this transformer already has tests on planner
   const existsOnGrid = eventList.some(
     (ev) => ev.transformer === transformer
   );
@@ -2504,17 +2348,14 @@ if (existsOnGrid) {
 return;
 }
 
-// Remove from planner transformer list
 setPlannerTransformers((prev) =>
   prev.filter((t) => t !== transformer)
 );
 
-// Remove from selected transformer list
 setSelectedTransformer((prev) =>
   prev.filter((t) => t !== transformer)
 );
 
-// Remove pending queue items
 setPendingEvents((prev) =>
   prev.filter(
     (ev) => ev.transformer !== transformer
@@ -2528,7 +2369,7 @@ message.success("Transformer removed.");
 const cellWidth = 50;
 const cellHeight = 50;
 const headerHeight = 60;
-const gridStartX = 2 * cellWidth;   // current assumption
+const gridStartX = 2 * cellWidth;  
 
 const totalCols = 2 + (7 * shifts.length);
 
@@ -2580,12 +2421,10 @@ const lmsUsage = {
 
 eventList.forEach((ev) => {
 
-    // Only LMS row
     if (ev.subItem !== "LMS") {
       return;
     }
 
-  // REL / PRE are excluded
   if (isExcludedFromLmsUsage(ev)) {
     return;
   }
@@ -2903,11 +2742,9 @@ height={totalStageHeight}
         key={weekIdx}
         y={weekOffsetY}
         >
-        {/* region */}
         <Rect x={0} y={0} width={cellWidth} height={headerHeight} fill="#fafafa" />
         <Text x={0} y={0} width={cellWidth} height={headerHeight} text="Region" align="center" verticalAlign="middle" fontStyle="bold" />
 
-        {/* sub item */}
         <Rect
         x={cellWidth}
         y={0}
@@ -2921,17 +2758,14 @@ height={totalStageHeight}
         height={headerHeight}
         text="Sub Item" align="center" verticalAlign="middle" fontStyle="bold" />
 
-        {/* DAYS */}
         {weekDays.map((d, i) => {
               const baseX = (2 + i * 3) * cellWidth;
 
               return (
                 <Group key={i}>
-                {/* Day */}
                 <Rect x={baseX} y={0} width={cellWidth * 3} height={30} fill="#f5f5f5" />
                 <Text x={baseX} y={0} width={cellWidth * 3} height={30} text={`${d.format("ddd")}               ${d.format("MM-DD")}`} align="center" verticalAlign="middle" />
 
-                {/* Shift */}
                 {shifts.map((s, idx) => {
                       const x = baseX + idx * cellWidth;
 
@@ -2957,7 +2791,6 @@ height={totalStageHeight}
             const group = (
               <Group key={`${region.name}-${sub}`}>
 
-              {/* region row span */}
               {isFirst && (
                   <>
                   <Rect
@@ -2981,10 +2814,9 @@ height={totalStageHeight}
                   </>
                 )}
 
-            {/* Sub item */}
             <Rect x={cellWidth} y={rowY} width={cellWidth} height={cellHeight} fill="#fff" />
             <Text
-            x={cellWidth + 6}//6 we used for the padding from left
+            x={cellWidth + 6}
             y={rowY}
             width={cellWidth - 6}
             height={cellHeight}
@@ -2992,7 +2824,6 @@ height={totalStageHeight}
             verticalAlign="middle"
             />
 
-            {/* GRID CELLS */}
             {weekDays.map((_, dayIdx) =>
                 shifts.map((_, shiftIdx) => {
                     const colIndex = 2 + dayIdx * 3 + shiftIdx;
@@ -3075,7 +2906,6 @@ strokeWidth={1.5}
 {Array.from({ length: totalCols + 1 }).map((_, col) => {
       const x = col * cellWidth;
 
-      // MAIN BORDERS
       const isMajorLine =
       col === 0 ||
       col === 1 ||
@@ -3086,7 +2916,6 @@ strokeWidth={1.5}
       return (
         <Group key={`hv-${col}`}>
 
-        {/* FULL HEADER HEIGHT LINES */}
         {isMajorLine && (
             <Rect
             x={x}
@@ -3097,7 +2926,6 @@ strokeWidth={1.5}
             />
           )}
 
-      {/* SHIFT INNER LINES ONLY IN ROW-2 */}
       {!isMajorLine && (
           <Rect
           x={x}
@@ -3112,7 +2940,6 @@ strokeWidth={1.5}
   );
 })}
 
-{/* vertical lines for each column boundary*/}
 {Array.from({ length: totalCols + 1 }).map((_, col) => {
       const x =
       col === totalCols
@@ -3120,7 +2947,6 @@ strokeWidth={1.5}
       : col * cellWidth;
 
       let color = "#ccc";
-      // 0 - left border1 - after Region2 -after SubItem totalCols - right border
       if (col === 0 || col === 1 || col === totalCols) color = "#000";
       if ((col - 2) % 3 === 0 && col >= 2) color = "#000";
 
@@ -3128,7 +2954,7 @@ strokeWidth={1.5}
         <Rect
         key={`v-${col}`}
         x={x}
-        y={headerRow1 + headerRow2} // start at shift row
+        y={headerRow1 + headerRow2} 
         width={1}
         height={singleWeekHeight - (headerRow1 + headerRow2)}
         fill={color}
@@ -3136,7 +2962,6 @@ strokeWidth={1.5}
       );
   })}
 
-{/* horizontal lines  */}
 {Array.from({ length: totalRows + 3 }).map((_, i) => {
       let y;
 
@@ -3159,15 +2984,12 @@ strokeWidth={1.5}
 
     return (
       <Group key={`h-${i}`}>
-      {/* HEADER */}
       {i <= 2 && (
           <>
 
           {i === 2 && (
               <Rect x={0} y={y} width={stageWidth} height={1} fill="#000" />
             )}
-
-        {/* header lines */}
         {i !== 2 && (
             <Rect
             x={cellWidth * 2}
@@ -3179,8 +3001,6 @@ strokeWidth={1.5}
           )}
       </>
     )}
-
-{/* REGION END */}
 {i > 2 && isRegionEnd && (
     <Rect
     x={0}
@@ -3205,7 +3025,6 @@ strokeWidth={1.5}
 );
 })}
 
-{/* Event */}
 {(() => {
       const visibleEvents =
       selectedPlannerTransformer.length === 0
@@ -3417,14 +3236,9 @@ onDragStart={(e) => {
 
     const node =
     e.target;
-
-    // IMPORTANT:
-    // Get the actual starting position
-    // of the event before dragging.
     const absolutePos =
     node.getAbsolutePosition();
 
-    // Store drag information in ref.
     dragInfoRef.current = {
 
       id:
@@ -3453,13 +3267,6 @@ onDragStart={(e) => {
 
     };
 
-  // IMPORTANT:
-  // These values are required by the
-  // group dragBoundFunc.
-  //
-  // We store them on the event object
-  // because the existing dragBoundFunc
-  // uses matchingEvent._dragStartX.
   matchingEvent._dragStartX =
   absolutePos.x;
 
@@ -3538,7 +3345,6 @@ onDragEnd={(e) => {
 
 setGroupDragStart(null);
 
-// Clear temporary drag-start values.
 matchingEvent._dragStartX =
 undefined;
 
@@ -3622,7 +3428,6 @@ if (retestActive) {
 
 }}
 >
-{/* LEFT BLOCK */}
 <Rect
 x={0}
 y={3}
@@ -3647,7 +3452,6 @@ strokeWidth={
 : 0
 }
 />
-{/* OVERFLOW TO NEXT WEEK */}
 {hasOverflow && (
     <Rect
     x={
@@ -3662,7 +3466,6 @@ strokeWidth={
   />
 )}
 
-{/* LEFT TEXT */}
 <Text
 x={0}
 y={0}
@@ -3674,8 +3477,6 @@ text={`${matchingEvent.transformer} (${matchingEvent.durationHours}h)
   align="center"
   verticalAlign="middle"
   />
-
-  {/* Witness Star */}
   {hasStar &&
     witnessSideMap[matchingEvent.id] === "left" && (
       <Star
@@ -3695,7 +3496,6 @@ text={`${matchingEvent.transformer} (${matchingEvent.durationHours}h)
     listening={false}
     />
   )}
-{/* Retest Star */}
 {hasRetest &&
   retestSideMap[matchingEvent.id] === "left" && (
     <Group
@@ -3743,8 +3543,6 @@ text={`${matchingEvent.transformer} (${matchingEvent.durationHours}h)
   verticalAlign="middle"
   />
 )}
-
-{/* GROUP DOT */}
 {matchingEvent.groupId && (
     <Rect
     x={leftWidth - 12}
@@ -3772,8 +3570,6 @@ return elements;
 })}
 <Group>
 
-{/* Queue Background */}
-
 <Rect
 x={gridWidth}
 y={0}
@@ -3782,7 +3578,6 @@ height={totalStageHeight}
 fill="#fafafa"
 
 />
-{/* LEFT SEPARATOR */}
 <Rect
 x={gridWidth}
 y={0}
@@ -3790,7 +3585,6 @@ width={1}
 height={totalStageHeight}
 fill="#000"
 />
-{/* TOP */}
 <Rect
 x={gridWidth}
 y={0}
@@ -3799,7 +3593,6 @@ height={1}
 fill="#000"
 />
 
-{/* RIGHT */}
 <Rect
 x={gridWidth + queueWidth - 1}
 y={0}
@@ -3831,7 +3624,6 @@ handleQueueDrop={handleQueueDrop}
 
 </div>
 
-{/* SHOW CONTAINER BUTTON */}
 {!showRightContainer && (
     <div
     style={{
@@ -3860,7 +3652,6 @@ handleQueueDrop={handleQueueDrop}
     }}
 >
 
-{/* SMALL CHECKBOX */}
 <div
 style={{
     width: "14px",
