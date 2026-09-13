@@ -22,7 +22,6 @@ const PlannerToolbar = ({
   return (
     <div className="buttons">
 
-      {/* CUSTOMER WITNESS */}
       <button
         onClick={handleToggleWitness}
         style={{
@@ -37,8 +36,6 @@ const PlannerToolbar = ({
         )}
       </button>
 
-
-      {/* RETEST */}
       <button
         onClick={handleToggleRetest}
         style={{
@@ -53,8 +50,6 @@ const PlannerToolbar = ({
         )}
       </button>
 
-
-      {/* SPLIT */}
       <Select
         className="split-task-select"
         placeholder="Split the Event"
@@ -81,26 +76,18 @@ const PlannerToolbar = ({
         ]}
       />
 
-
-      {/* PRINT */}
       <button onClick={handlePrintPlanner}>
         Export / Print PDF
       </button>
 
-
-      {/* GROUP */}
       <button onClick={handleGroupTest}>
         Group Test
       </button>
 
-
-      {/* UNGROUP */}
       <button onClick={handleUngroup}>
         Ungroup
       </button>
 
-
-      {/* DELETE */}
       <button
         onClick={handleToggleDelete}
         style={{
@@ -130,8 +117,6 @@ const PlannerToolbar = ({
         )}
       </button>
 
-
-      {/* BLOCK */}
       <button
         disabled={!blockSelectionActive}
         onClick={handleBlock}
@@ -139,8 +124,6 @@ const PlannerToolbar = ({
         Block (holiday/Maintenance)
       </button>
 
-
-      {/* UNBLOCK */}
       <button
         disabled={!blockSelectionActive}
         onClick={handleUnBlock}
@@ -148,8 +131,6 @@ const PlannerToolbar = ({
         Un Block
       </button>
 
-
-      {/* PARKING */}
       <button>
         Parking
       </button>

@@ -33,7 +33,7 @@ const TransformerModal = ({
         setAddTransformerModalOpen(false);
 
       }}
-
+      
       onOk={() => {
 
         if (modalTransformers.length === 0) {

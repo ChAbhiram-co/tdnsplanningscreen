@@ -57,11 +57,10 @@ const PlannerSetup = ({
           }}
         >
 
-          {/* MONTH */}
           <div
             style={{
               width: "100%",
-              // height: "40px",
+
             }}
           >
             <label
@@ -84,7 +83,6 @@ const PlannerSetup = ({
             />
           </div>
 
-          {/* WEEK RANGE */}
           <div
             style={{
               width: "100%",
@@ -123,7 +121,6 @@ const PlannerSetup = ({
                     "week"
                   ) + 1;
 
-                // Only allow 4 or 5 weeks
                 if (
                   totalWeeks !== 4 &&
                   totalWeeks !== 5
@@ -136,15 +133,11 @@ const PlannerSetup = ({
 
                   return;
                 }
-
-                // Keep EXACTLY what the user selected
                 setSelectedWeekRange([
                   startWeek,
                   endWeek,
                 ]);
 
-                // 4 weeks = 28
-                // 5 weeks = 35
                 const totalDays =
                   totalWeeks * 7;
 
@@ -165,7 +158,6 @@ const PlannerSetup = ({
             />
           </div>
 
-          {/* TRANSFORMERS */}
           <div
             style={{
               width: "100%",
@@ -213,7 +205,6 @@ const PlannerSetup = ({
             />
           </div>
 
-          {/* VERSION */}
           <div
             style={{
               width: "100%",
@@ -241,7 +232,6 @@ const PlannerSetup = ({
 
                 const value = e.target.value;
 
-                // Allow only digits and one decimal point
                 if (/^\d*\.?\d*$/.test(value)) {
                   setSelectedVersion(value);
                 }

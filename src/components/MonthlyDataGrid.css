@@ -26,7 +26,6 @@
   white-space: nowrap; 
 }
 
-/* === Buttons === */
 .buttons {
   display: flex;
   justify-content: flex-start;
@@ -72,7 +71,6 @@
   border-right: 1px solid #ccc !important;
 }
 
-/* Preserve black borders on extreme left/right */
 .schedule-table .shift-row th:first-child,
 .schedule-table tbody tr td.shift-cell:first-child {
   border-left: 1px solid #000 !important;
@@ -82,22 +80,18 @@
   border-right: 1px solid #000 !important;
 }
 
-/* Bottom border of header row = black */
 .schedule-table thead .shift-row th {
   border-bottom: 1px solid #000 !important;
 }
 
-/* Black separator after shift 1, 2, 3 across header + body */
 .schedule-table .black-separator {
   border-right: 1px solid #000 !important;
 }
 
-/* Day end separator */
 .schedule-table .day-separator {
   border-right: 1px solid #000 !important;
 }
 
-/* Headers */
 .day-header {
   font-size: 13px;
   font-weight: 600;
@@ -112,7 +106,6 @@
   color: #555;
 }
 
-/* Region/Sub columns */
 .region-col {
   width: 100px;
   background: #fafafa;
@@ -136,7 +129,6 @@
   background: #fcfcfc;
 }
 
-/* Event block inside cells */
 .cell {
   height: 45px;
   position: relative;
@@ -165,7 +157,6 @@
     
 }
 
-/* 🔹 Create Test Modal */
 .create-test-modal {
  top:0%
 }
@@ -189,15 +180,14 @@
 .create-test-modal .ant-modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1a237e;   /* dark blue title */
+  color: #1a237e;   
 }
 
 .create-test-modal .ant-modal-body {
   margin-top: 5px;
-  color: #222;  /* dark readable text */
+  color: #222;  
 }
 
-/*  Form Groups */
 .form-group {
   margin-bottom: 14px;
   display: flex;
@@ -211,7 +201,6 @@
   color: #333;
 }
 
-/*  Inputs / Select */
 .form-control,
 .ant-picker {
     padding: 8px 10px !important;
@@ -221,7 +210,6 @@
     background: #fafafa;
 }
 
-/* Don't style every Select globally */
 .ant-select .ant-select-selector{
     border-radius:6px !important;
 }
@@ -234,7 +222,6 @@
   background: #fff;
 }
 
-/*  Buttons */
 .create-test-modal .ant-modal-footer {
   border-top: none;
   padding-top: 4px;
@@ -268,16 +255,14 @@
   width: 300px !important; 
 }
 
-/* 🔹 Move modal slightly lower */
 .ant-modal {
   top: 28px !important;
 }
 
-/* Add black border after shift 2 */
 .shift-cell.black-separator {
   border-right: 1px solid black !important;
 }
-/* Green dot (active indicator) */
+
 .witness-dot {
   position: absolute;
   right: 6px;
@@ -291,7 +276,6 @@
   display: inline-block;
 }
 
-/* Event star (⭐) */
 .event-star {
   font-size: 18px;
   color: gold;
@@ -302,24 +286,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;               /* small spacing when inline */
-  white-space: nowrap;    /* keep inline clean */
+  gap: 2px;               
+  white-space: nowrap;    
 }
 
 
 .event-text {
-  flex-direction: row;    /* default inline */
+  flex-direction: row;    
 }
 
 .event-text:has(.event-star) {
-  flex-wrap: wrap;        /* allow stacking if tight */
+  flex-wrap: wrap;        
 }
 
 .event-text .event-star {
-  font-size: 14px;        /* keep star sized nicely */
+  font-size: 14px;        
 }
 
-/* ✅ Force vertical when cell is really small */
 @container cell (max-width: 60px) {
   .event-text {
     flex-direction: column;
@@ -328,32 +311,27 @@
   }
 }
 
-/* Ensure split blocks never overflow */
 .cell > div > div {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Hide the slider tooltip after value is selected */
 .ant-tooltip {
   display: none !important;
 }
-/* ===== BASE GRID (LIGHT LINES) ===== */
 .schedule-table th,
 .schedule-table td {
-  border: 1px solid #ccc;   /* light lines default */
+  border: 1px solid #ccc;   
   text-align: center;
   font-size: 13px;
   padding: 6px;
   min-width: 30px;
 }
 
-/* ===== OUTER BORDER (BLACK) ===== */
 .schedule-table {
   border: 1px solid #000;
 }
 
-/* ===== REGION & SUB COLUMNS (BLACK LINE AFTER) ===== */
 .region-col,
 .sub-col,
 .region-name,
@@ -361,42 +339,31 @@
   border-right: 1px solid #000 !important;
 }
 
-/* ===== HEADER BOTTOM (BLACK STRONG LINE) ===== */
 .schedule-table thead tr:last-child th {
   border-bottom: 1px solid #000 !important;
 }
 
-/* ===== SHIFT GROUP LOGIC ===== */
-
-/* default shifts → light */
 .shift-cell {
   border-left: 1px solid #ccc !important;
   border-right: 1px solid #ccc !important;
 }
 
-/* LAST SHIFT (2) → BLACK separator */
 .black-separator {
   border-right: 1px solid #000 !important;
 }
 
-/* ===== DAY END (AFTER 3 SHIFTS) ===== */
 .schedule-table thead th[colspan] {
   border-right: 1px solid #000 !important;
 }
 
-/* ===== REGION BLOCK SEPARATION ===== */
 tbody tr td[rowspan] {
   border-bottom: 1px solid #000 !important;
 }
 
-/* ===== ROW LINES ===== */
-
-/* header rows → BLACK */
 .schedule-table thead th {
   border-top: 1px solid #000;
 }
 
-/* data rows → LIGHT */
 .schedule-table tbody td {
   border-top: 1px solid #ccc;
 }
@@ -404,12 +371,6 @@ tbody tr td[rowspan] {
   font-size: 14px !important;
   font-weight: 500 !important;
   color: #333 !important;
- 
-
- 
-
-
-
 }
 .buttons .ant-select-selector {
   min-height: 40px !important;
@@ -430,11 +391,6 @@ tbody tr td[rowspan] {
 .ant-select-selection-placeholder {
   line-height: 32px !important;
 }
-
-/* ===========================
-   PRINT LAYOUT
-=========================== */
-
 @media print {
 
   body {
@@ -442,14 +398,9 @@ tbody tr td[rowspan] {
     background: white;
   }
 
-  /* Hide everything */
-
   body * {
     visibility: hidden;
   }
-
-  /* Show planner only */
-
   #planner-print-area,
   #planner-print-area * {
     visibility: visible;
@@ -471,7 +422,6 @@ tbody tr td[rowspan] {
     border-radius:0;
 }
 
-/* Header */
 .add-transformer-modal .ant-modal-header{
     height:48px;
     display:flex;
@@ -487,14 +437,11 @@ tbody tr td[rowspan] {
     font-weight:600;
 }
 
-
-/* Body */
 .add-transformer-modal .ant-modal-body{
     padding:18px 28px 18px 34px;
     min-height:55px;
 }
 
-/* Footer */
 .add-transformer-modal .ant-modal-footer{
     margin:0;
     height: 48px;
@@ -503,7 +450,6 @@ tbody tr td[rowspan] {
     border-top:1px solid #f0f0f0;
     background:#fff;
 }
-/* Let multiple Select grow naturally */
 .add-transformer-modal
 .ant-select-multiple
 .ant-select-selector{
@@ -528,7 +474,6 @@ tbody tr td[rowspan] {
 }
 
 .transformer-details{
-  
   width:100%;
   white-space:normal;
   word-break:normal;
@@ -540,7 +485,6 @@ tbody tr td[rowspan] {
 .transformer-item{
   display:inline;
   font-weight:bold;
-  
 }
 
 .transformer-separator{

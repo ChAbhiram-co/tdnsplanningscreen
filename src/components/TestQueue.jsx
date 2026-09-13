@@ -24,7 +24,6 @@ const TestQueue = ({
   return (
     <Group>
 
-      {/* BOTTOM */}
       <Rect
         x={gridWidth}
         y={totalStageHeight - 1}
@@ -33,8 +32,6 @@ const TestQueue = ({
         fill="#000"
       />
 
-
-      {/* Queue Header */}
       <Rect
         x={gridWidth}
         y={46}
@@ -75,7 +72,6 @@ const TestQueue = ({
           return (
             <Group key={transformer}>
 
-              {/* Transformer Header */}
               <Text
                 x={gridWidth + 10}
                 y={headerY + 8}
@@ -110,8 +106,6 @@ const TestQueue = ({
                 }
               />
 
-
-              {/* Tests */}
               {expandedTransformers[transformer] &&
                 tests.map((ev, index) => {
 
@@ -187,7 +181,6 @@ const TestQueue = ({
 
                       }}
 
-
                       onDragStart={(e) => {
 
                         ev._queueStartX =
@@ -231,7 +224,6 @@ const TestQueue = ({
                           );
 
                         }
-
 
                         e.target.position({
                           x: ev._queueStartX,
