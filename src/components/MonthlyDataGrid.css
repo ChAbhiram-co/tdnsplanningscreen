@@ -1,11 +1,19 @@
 .monthly-grid-container {
   font-family: "Poppins", Arial, sans-serif;
-  padding: 30px;
+
+  padding-top: 50px;
+  padding-left: 50px;
+  padding-bottom: 50px;
+  padding-right: 48px;
+
   box-sizing: border-box;
   background: #f8f9fb;
   color: #333;
   position: relative;
-  min-width: 1513px;
+  min-width: 1519px;
+ 
+
+  overflow-x: hidden;
 }
 
 .monthly-grid-container h2 {
@@ -13,25 +21,26 @@
   margin-bottom: 10px;
   font-weight: 600;
   font-size: 22px;
-  text-align: center;
-  margin-left: 7px;
-  margin-right: 1175px;
+  margin-left: 3px;
+
+  white-space: nowrap; 
 }
 
-/* === Buttons === */
 .buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
   margin-bottom: 13px;
+  width: 1300px;
   text-align: center;
-  margin-left: 52px;
-  width: 750px;
 }
 
 .buttons button {
   background: #fff;
   border: 1px solid #d9d9d9;
   border-radius: 6px;
-  padding: 8px 16px;
-  margin: 0 6px;
+  padding: 7px 14px;
+  /* margin: 0 5px; */
   font-size: 14px;
   font-weight: 500;
   color: #333;              
@@ -45,7 +54,7 @@
   color: #1890ff;
 }
 
-/* === Table === */
+
 .schedule-table {
   width: 90%;
   margin: 0 auto 3px auto;
@@ -55,21 +64,13 @@
   border: 1px solid #000; 
 }     
 
-.schedule-table th,
-.schedule-table td {
-  border: 1px solid #000;
-  text-align: center;
-  font-size: 13px;
-  padding: 6px;
-  min-width: 30px;
-}
+
 
 .schedule-table .shift-cell {
   border-left: 1px solid #ccc !important;
   border-right: 1px solid #ccc !important;
 }
 
-/* Preserve black borders on extreme left/right */
 .schedule-table .shift-row th:first-child,
 .schedule-table tbody tr td.shift-cell:first-child {
   border-left: 1px solid #000 !important;
@@ -79,22 +80,18 @@
   border-right: 1px solid #000 !important;
 }
 
-/* Bottom border of header row = black */
 .schedule-table thead .shift-row th {
   border-bottom: 1px solid #000 !important;
 }
 
-/* Black separator after shift 1, 2, 3 across header + body */
 .schedule-table .black-separator {
   border-right: 1px solid #000 !important;
 }
 
-/* Day end separator */
 .schedule-table .day-separator {
   border-right: 1px solid #000 !important;
 }
 
-/* Headers */
 .day-header {
   font-size: 13px;
   font-weight: 600;
@@ -109,7 +106,6 @@
   color: #555;
 }
 
-/* Region/Sub columns */
 .region-col {
   width: 100px;
   background: #fafafa;
@@ -133,7 +129,6 @@
   background: #fcfcfc;
 }
 
-/* Event block inside cells */
 .cell {
   height: 45px;
   position: relative;
@@ -162,7 +157,6 @@
     
 }
 
-/* 🔹 Create Test Modal */
 .create-test-modal {
  top:0%
 }
@@ -186,15 +180,14 @@
 .create-test-modal .ant-modal-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1a237e;   /* dark blue title */
+  color: #1a237e;   
 }
 
 .create-test-modal .ant-modal-body {
   margin-top: 5px;
-  color: #222;  /* dark readable text */
+  color: #222;  
 }
 
-/* 🔹 Form Groups */
 .form-group {
   margin-bottom: 14px;
   display: flex;
@@ -208,17 +201,17 @@
   color: #333;
 }
 
-/* 🔹 Inputs / Select */
 .form-control,
-.ant-select-selector,
 .ant-picker {
-  padding: 8px 10px !important;
-  border-radius: 6px !important;
-  border: 1px solid #ccc !important;
-  font-size: 13px;
-  background: #fafafa;
-  color: #222 !important;
-  transition: all 0.25s ease;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ccc !important;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+.ant-select .ant-select-selector{
+    border-radius:6px !important;
 }
 
 .form-control:focus,
@@ -229,7 +222,6 @@
   background: #fff;
 }
 
-/* 🔹 Buttons */
 .create-test-modal .ant-modal-footer {
   border-top: none;
   padding-top: 4px;
@@ -263,16 +255,14 @@
   width: 300px !important; 
 }
 
-/* 🔹 Move modal slightly lower */
 .ant-modal {
   top: 28px !important;
 }
 
-/* Add black border after shift 2 */
 .shift-cell.black-separator {
   border-right: 1px solid black !important;
 }
-/* Green dot (active indicator) */
+
 .witness-dot {
   position: absolute;
   right: 6px;
@@ -286,7 +276,6 @@
   display: inline-block;
 }
 
-/* Event star (⭐) */
 .event-star {
   font-size: 18px;
   color: gold;
@@ -297,24 +286,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;               /* small spacing when inline */
-  white-space: nowrap;    /* keep inline clean */
+  gap: 2px;               
+  white-space: nowrap;    
 }
 
-/* ✅ When the container is narrow, stack vertically */
+
 .event-text {
-  flex-direction: row;    /* default inline */
+  flex-direction: row;    
 }
 
 .event-text:has(.event-star) {
-  flex-wrap: wrap;        /* allow stacking if tight */
+  flex-wrap: wrap;        
 }
 
 .event-text .event-star {
-  font-size: 14px;        /* keep star sized nicely */
+  font-size: 14px;        
 }
 
-/* ✅ Force vertical when cell is really small */
 @container cell (max-width: 60px) {
   .event-text {
     flex-direction: column;
@@ -323,13 +311,183 @@
   }
 }
 
-/* Ensure split blocks never overflow */
 .cell > div > div {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Hide the slider tooltip after value is selected */
 .ant-tooltip {
   display: none !important;
+}
+.schedule-table th,
+.schedule-table td {
+  border: 1px solid #ccc;   
+  text-align: center;
+  font-size: 13px;
+  padding: 6px;
+  min-width: 30px;
+}
+
+.schedule-table {
+  border: 1px solid #000;
+}
+
+.region-col,
+.sub-col,
+.region-name,
+.sub-name {
+  border-right: 1px solid #000 !important;
+}
+
+.schedule-table thead tr:last-child th {
+  border-bottom: 1px solid #000 !important;
+}
+
+.shift-cell {
+  border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+}
+
+.black-separator {
+  border-right: 1px solid #000 !important;
+}
+
+.schedule-table thead th[colspan] {
+  border-right: 1px solid #000 !important;
+}
+
+tbody tr td[rowspan] {
+  border-bottom: 1px solid #000 !important;
+}
+
+.schedule-table thead th {
+  border-top: 1px solid #000;
+}
+
+.schedule-table tbody td {
+  border-top: 1px solid #ccc;
+}
+.ant-select-selection-placeholder {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+}
+.buttons .ant-select-selector {
+  min-height: 40px !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  padding: 1px 16px 2px 8px !important;
+}
+
+.ant-select-multiple.ant-select-lg .ant-select-selector {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding-top: 2px !important;
+  overflow: hidden !important;
+}
+
+.ant-select-selection-placeholder {
+  line-height: 32px !important;
+}
+@media print {
+
+  body {
+    margin: 0;
+    background: white;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  #planner-print-area,
+  #planner-print-area * {
+    visibility: visible;
+  }
+
+  #planner-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+}
+
+.add-transformer-modal .ant-modal-content{
+    width:450px;
+    min-height:158px;
+    padding:0;
+    border-radius:0;
+}
+
+.add-transformer-modal .ant-modal-header{
+    height:48px;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    margin:0;
+    border-bottom:1px solid #f0f0f0;
+    background:#fff;
+}
+
+.add-transformer-modal .ant-modal-title{
+    font-size:15px;
+    font-weight:600;
+}
+
+.add-transformer-modal .ant-modal-body{
+    padding:18px 28px 18px 34px;
+    min-height:55px;
+}
+
+.add-transformer-modal .ant-modal-footer{
+    margin:0;
+    height: 48px;
+
+    padding:8px 20px;
+    border-top:1px solid #f0f0f0;
+    background:#fff;
+}
+.add-transformer-modal
+.ant-select-multiple
+.ant-select-selector{
+    min-height:32px !important;
+    height:auto !important;
+    align-items:flex-start !important;
+    padding-top:3px !important;
+    padding-bottom:3px !important;
+}
+.split-task-select .ant-select-arrow {
+  margin-bottom: 1px;
+  margin-top: 1px;
+  font-size: 10px;
+}
+
+.transformer-section{
+  margin-top:15mm;
+  width:100%;
+  text-align:center;
+  line-height:1.1;
+
+}
+
+.transformer-details{
+  width:100%;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  text-align:center;
+  margin-top: 12px;
+}
+
+.transformer-item{
+  display:inline;
+  font-weight:bold;
+}
+
+.transformer-separator{
+  display:inline;
+  margin:0 2px;
 }

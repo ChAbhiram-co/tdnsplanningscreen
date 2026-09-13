@@ -1,2285 +1,3679 @@
-// import React from "react";
-// import "./MonthlyDataGrid.css";
-
-// const regions = [
-//   { name: "EHV", subItems: ["Impulse", "Indar"] },
-//   { name: "NORTH", subItems: ["Tes", "Kato"] },
-//   { name: "SOUTH", subItems: ["Tes", "MI"] },
-// ];
-
-// const events = [
-//   { week: 1, day: 1, shift: 1, region: "EHV", subItem: "Impulse", text: "sfra\nA1", color: "red" },
-//   { week: 1, day: 3, shift: 2, region: "EHV", subItem: "Impulse", text: "sfra\nA1", color: "red" },
-//   { week: 1, day: 2, shift: 3, region: "NORTH", subItem: "Tes", text: "Text\nA1⭐", color: "lightblue" },
-//   { week: 1, day: 3, shift: 1, region: "NORTH", subItem: "Tes", text: "sfra\nA1 ⭐", color: "yellow" },
-//   { week: 2, day: 7, shift: 2, region: "SOUTH", subItem: "MI", text: "sfra\nA2", color: "yellow" },
-
-//   { week: 3, day: 4, shift: 1, region: "EHV", subItem: "Indar", text: "sfra\nA3", color: "lightgreen" },
-//   { week: 4, day: 6, shift: 3, region: "NORTH", subItem: "Kato", text: "sfra\nA4", color: "orange" },
-// ];
-
-// const weeks = [1, 2, 3, 4];
-// const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-// const shifts = [3, 1, 2];
-
-// function MonthlyDataGrid() {
-//   return (
-//     <div className="monthly-grid-container">
-//       <h2 className="title">Monthly Data</h2>
-//       <div className="buttons">
-//         <button>Add Customer Witness</button>
-//         <button>Split Selected Vertically</button>
-//         <button>calander </button>
-//         <button>create test </button>
-//       </div>
-
-//       {weeks.map((week) => (
-//         <table className="schedule-table" key={week}>
-//           <thead>
-//             {/* Top row: Day names spanning 3 shifts */}
-//             <tr>
-//               <th rowSpan="3" className="region-col">Region</th>
-//               <th rowSpan="3" className="sub-col">Sub Item</th>
-//               {days.map((d, i) => (
-//                 <th key={i} className="day-header" colSpan={3}>{d}</th>
-//               ))}
-//             </tr>
-//             {/* Second row: Date cells spanning 3 shifts */}
-//             <tr>
-//               {days.map((_, i) => (
-//                 <th key={i} className="date-cell" colSpan={3}>
-//                   {String(i + 1 + (week - 1) * 7).padStart(2, "0")}-07
-//                 </th>
-//               ))}
-//             </tr>
-//             {/* Third row: individual shift headers */}
-//       <tr className="shift-row">
-//   {days.map((_, i) =>
-//     shifts.map((s, idx) => (
-//       <th
-//         key={`${i}-${s}`}
-//         className={`shift-cell ${
-//           idx === 0 || idx === 1 || idx === 2 ? "black-separator" : ""
-//         }`}
-//       >
-//         {s}
-//       </th>
-//     ))
-//   )}
-// </tr>
-
-
-//           </thead>
-
-//  <tbody>
-//   {regions.map((region) =>
-//     region.subItems.map((sub, i) => (
-//       <tr key={sub}>
-//         {i === 0 && (
-//           <td rowSpan={region.subItems.length} className="region-name">
-//             {region.name}
-//           </td>
-//         )}
-//         <td className="sub-name">{sub}</td>
-
-//         {days.map((_, dayIdx) =>
-//           shifts.map((s, shiftIdx) => {
-//             const ev = events.find(
-//               (e) =>
-//                 e.week === week &&
-//                 e.day === dayIdx + 1 &&
-//                 e.shift === s &&
-//                 e.region === region.name &&
-//                 e.subItem === sub
-//             );
-
-//             return (
-//               <td
-//                 key={`${dayIdx}-${s}`}
-//                 className={`cell shift-cell ${
-//                   shiftIdx === 3 ? "black-separator" : ""
-//                 } ${shiftIdx === shifts.length - 1 ? "day-separator" : ""}`}
-//               >
-//                 {ev && (
-//                   <div
-//                     className="event-block"
-//                     style={{ backgroundColor: ev.color }}
-//                   >
-//                     {ev.text}
-//                   </div>
-//                 )}
-//               </td>
-//             );
-//           })
-//         )}
-//       </tr>
-//     ))
-//   )}
-// </tbody>
-//         </table>
-//       ))}
-//     </div>
-//   );
-// }
-
-// export default MonthlyDataGrid;`
-
-// ----------------------------------------------above one is static ---------------------------------------------//
-// //15-09-2025
-// import React, { useState } from "react";
-// import { DatePicker, Modal, message } from "antd";
-// import dayjs from "dayjs";
-// import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-// import "./MonthlyDataGrid.css";
-
-// dayjs.extend(isSameOrBefore);
-
-// const { RangePicker } = DatePicker;
-
-// const regions = [
-//   { name: "EHV", subItems: ["Impulse", "LMS","Others"] },
-//   { name: "NORTH", subItems: ["Impulse", "LMS","Others"] },
-//   { name: "SOUTH", subItems: ["Impulse", "LMS","Others"] },
-// ];
-
-// const shifts = [3, 1, 2];
-
-// const TEST_STYLES = {
-//   SfraA1: { color: "red", text: "SfraA1" },
-//   SfraA2: { color: "yellow", text: "SfraA2" },
-//   TestA1: { color: "lightblue", text: "Test A1" },
-// };
-
-// const SHIFT_ORDER = [3, 1, 2];
-// const nextShiftAndDate = (shift, date) => {
-//   const idx = SHIFT_ORDER.indexOf(shift);
-//   if (idx === -1 || idx === SHIFT_ORDER.length - 1) {
-//     return { shift: SHIFT_ORDER[0], date: date.add(1, "day") };
-//   }
-//   return { shift: SHIFT_ORDER[idx + 1], date };
-// };
-
-// function MonthlyDataGrid() {
-//   const [showCalendar, setShowCalendar] = useState(false);
-//   const [tempRange, setTempRange] = useState([]);
-//   const [eventList, setEventList] = useState([]);
-
-//   const [daysArray, setDaysArray] = useState(() => {
-//     const base = dayjs("2025-09-01");
-//     return Array.from({ length: base.daysInMonth() }, (_, i) =>
-//       base.date(i + 1)
-//     );
-//   });
-
-//   const getWeeks = (days) => {
-//     const weeks = [];
-//     for (let i = 0; i < days.length; i += 7) {
-//       weeks.push(days.slice(i, i + 7));
-//     }
-//     return weeks;
-//   };
-
-//   const applyDateRange = () => {
-//     if (!tempRange || tempRange.length !== 2) {
-//       message.error("Please select both start and end dates!");
-//       return;
-//     }
-//     const [start, end] = tempRange;
-//     let current = start.startOf("day");
-
-//     if (end.diff(start, "day") + 1 > 28) {
-//       message.error("Date range cannot exceed 28 days.");
-//       return;
-//     }
-
-//     const selectedDays = [];
-//     while (current.isSameOrBefore(end, "day")) {
-//       selectedDays.push(current);
-//       current = current.add(1, "day");
-//     }
-
-//     setDaysArray(selectedDays);
-//     setShowCalendar(false);
-//   };
-
-//   const handleCancel = () => {
-//     setTempRange([]);
-//     setShowCalendar(false);
-//   };
-
-//   const weeks = getWeeks(daysArray);
-
-//   const [showCreateTest, setShowCreateTest] = useState(false);
-//   const [testForm, setTestForm] = useState({
-//     name: "",
-//     date: null,
-//     region: "",
-//     hours: "",
-//     shift: "",
-//   });
-
-//   const handleCreateTest = () => {
-//     const { name, date, region, hours, shift } = testForm;
-
-//     if (!name || !TEST_STYLES[name]) {
-//       message.error("Please select a test.");
-//       return;
-//     }
-//     if (!date) {
-//       message.error("Please select a start date.");
-//       return;
-//     }
-//     if (date.isBefore(dayjs("2025-08-01"), "day")) {
-//       message.error("Start date must be on/after 01-08-2025.");
-//       return;
-//     }
-//     if (!region.includes("-")) {
-//       message.error("Please select region and sub item.");
-//       return;
-//     }
-//     const hrs = Number(hours);
-//     if (!hrs || hrs <= 0) {
-//       message.error("Hours must be positive.");
-//       return;
-//     }
-//     const shiftNum = Number(shift);
-//     if (!SHIFT_ORDER.includes(shiftNum)) {
-//       message.error("Invalid shift.");
-//       return;
-//     }
-
-//     const [regionName, subItemName] = region.split("-");
-
-//     let remaining = hrs;
-//     let currentDate = date.startOf("day");
-//     let currentShift = shiftNum;
-//     const toAdd = [];
-
-//     while (remaining > 0) {
-//       const allot = Math.min(8, remaining);
-//       toAdd.push({
-//         date: currentDate,
-//         shift: currentShift,
-//         region: regionName,
-//         subItem: subItemName,
-//         test: name,
-//         color: TEST_STYLES[name].color,
-//         label: TEST_STYLES[name].text,
-//         hours: allot,
-//       });
-//       remaining -= allot;
-//       const next = nextShiftAndDate(currentShift, currentDate);
-//       currentShift = next.shift;
-//       currentDate = next.date;
-//     }
-
-//     setEventList((prev) => [...prev, { merged: true, parts: toAdd }]);
-//     setShowCreateTest(false);
-//     setTestForm({ name: "", date: null, region: "", hours: "", shift: "" });
-//   };
-
-//   // 🔹 Customer Witness
-//   const [witnessActive, setWitnessActive] = useState(false);
-//   const [witnessTests, setWitnessTests] = useState(new Set());
-
-//   const handleToggleWitness = () => {
-//     setWitnessActive((prev) => !prev);
-//   };
-
-//   const handleToggleStar = (eventKey) => {
-//     if (!witnessActive) return;
-//     setWitnessTests((prev) => {
-//       const newSet = new Set(prev);
-//       if (newSet.has(eventKey)) newSet.delete(eventKey);
-//       else newSet.add(eventKey);
-//       return newSet;
-//     });
-//   };
-
-//   // 🔹 Split Event Logic
-//   const [splitActive, setSplitActive] = useState(false);
-
-//   const handleToggleSplit = () => {
-//     setSplitActive((prev) => !prev);
-//   };
-// //-----------===---------------===-----------------
-//   const handleSplitEvent = (eventKey, mergedEvent) => {
-//     Modal.confirm({
-//       title: "Split Test",
-//       content: "Are you sure you want to split this test into 2 equal parts?",
-//       onOk: () => {
-//         const totalHours = mergedEvent.parts.reduce(
-//           (sum, p) => sum + p.hours,
-//           0
-//         );
-//         const half = Math.floor(totalHours / 2);
-//         const otherHalf = totalHours - half;
-
-//         const { region, subItem, test, color, label } = mergedEvent.parts[0];
-//         const startDate = mergedEvent.parts[0].date;
-//         const startShift = mergedEvent.parts[0].shift;
-
-//         const allocateParts = (hours, date, shift) => {
-//           let remaining = hours;
-//           let currentDate = date;
-//           let currentShift = shift;
-//           const parts = [];
-
-//           while (remaining > 0) {
-//             const allot = Math.min(8, remaining);
-//             parts.push({
-//               date: currentDate,
-//               shift: currentShift,
-//               region,
-//               subItem,
-//               test,
-//               color,
-//               label,
-//               hours: allot,
-//             });
-//             remaining -= allot;
-//             const next = nextShiftAndDate(currentShift, currentDate);
-//             currentShift = next.shift;
-//             currentDate = next.date;
-//           }
-
-//           return parts;
-//         };
-
-//         const firstHalfParts = allocateParts(half, startDate, startShift);
-
-//         const last = firstHalfParts[firstHalfParts.length - 1];
-//         const next = nextShiftAndDate(last.shift, last.date);
-//         const secondHalfParts = allocateParts(otherHalf, next.date, next.shift);
-
-//         const firstEvent = { merged: true, parts: firstHalfParts };
-//         const secondEvent = { merged: true, parts: secondHalfParts };
-
-//         setEventList((prev) => {
-//           const filtered = prev.filter((ev) => ev !== mergedEvent);
-//           return [...filtered, firstEvent, secondEvent];
-//         });
-
-//         message.success("Test split into two halves!");
-//       },
-//     });
-//   };
+import React, { useState, useRef, useEffect } from "react";
+import {
   
-
-//   return (
-//     <div className="monthly-grid-container">
-//       <h2 className="title">Monthly Data</h2>
-
-//       <div className="buttons">
-//         <button
-//           onClick={handleToggleWitness}
-//           style={{ position: "relative", paddingRight: "20px" }}
-//         >
-//           Add Customer Witness
-//           {witnessActive && <span className="witness-dot"></span>}
-//         </button>
-
-//         <button
-//           onClick={handleToggleSplit}
-//           style={{ position: "relative", paddingRight: "20px" }}
-//         >
-//           Split Selected Vertically
-//           {splitActive && <span className="witness-dot"></span>}
-//         </button>
-
-//         <button onClick={() => setShowCalendar(true)}>Calendar</button>
-//         <button onClick={() => setShowCreateTest(true)}>Create Test</button>
-//         <button>Delete Test</button>
-//       </div>
-
-//       {/* Calendar Modal */}
-//       <Modal
-//         title="Select Date Range"
-//         open={showCalendar}
-//         onOk={applyDateRange}
-//         onCancel={handleCancel}
-//         okText="OK"
-//       >
-//         <RangePicker
-//           value={tempRange}
-//           onChange={(values) => setTempRange(values || [])}
-//           defaultPickerValue={[dayjs("2025-08-01"), dayjs("2025-08-01")]}
-//           disabledDate={(current) =>
-//             current && current.isBefore(dayjs("2025-08-01"), "day")
-//           }
-//         />
-//       </Modal>
-
-//       {/* Create Test Modal */}
-//       <Modal
-//         title="Create Test"
-//         open={showCreateTest}
-//         onOk={handleCreateTest}
-//         onCancel={() => setShowCreateTest(false)}
-//         okText="Create"
-//         className="create-test-modal"
-//       >
-//         {/* form fields */}
-//         <div className="form-group">
-//           <label>Name of the Test</label>
-//           <select
-//             className="form-control"
-//             value={testForm.name}
-//             onChange={(e) => setTestForm({ ...testForm, name: e.target.value })}
-//           >
-//             <option value="">Select Test</option>
-//             <option value="SfraA1">SfraA1</option>
-//             <option value="SfraA2">SfraA2</option>
-//             <option value="TestA1">TestA1</option>
-//           </select>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Date to Start</label>
-//           <DatePicker
-//             value={testForm.date}
-//             onChange={(date) => setTestForm({ ...testForm, date })}
-//             disabledDate={(current) =>
-//               current && current.isBefore(dayjs("2025-08-01"), "day")
-//             }
-//             className="form-control"
-//           />
-//         </div>
-// <div className="form-group">
-//   <label>Region</label>
-//   <select
-//     className="form-control"
-//     value={testForm.region}
-//     onChange={(e) => setTestForm({ ...testForm, region: e.target.value })}
-//   >
-//     <option value="">Select Region</option>
-//     {regions.map((reg) => (
-//       <optgroup key={reg.name} label={reg.name}>
-//         {reg.subItems.map((sub) => (
-//           <option key={`${reg.name}-${sub}`} value={`${reg.name}-${sub}`}>
-//             {sub}
-//           </option>
-//         ))}
-//       </optgroup>
-//     ))}
-//   </select>
-// </div>
-
-
-
-//         <div className="form-group">
-//           <label>Test Hours</label>
-//           <input
-//             type="number"
-//             className="form-control"
-//             value={testForm.hours}
-//             onChange={(e) =>
-//               setTestForm({ ...testForm, hours: parseInt(e.target.value, 10) })
-//             }
-//             placeholder="Enter hours"
-//             min={1}
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label>Shift</label>
-//           <select
-//             className="form-control"
-//             value={testForm.shift}
-//             onChange={(e) => setTestForm({ ...testForm, shift: e.target.value })}
-//           >
-//             <option value="">Select Shift</option>
-//             <option value="3">3</option>
-//             <option value="1">1</option>
-//             <option value="2">2</option>
-//           </select>
-//         </div>
-//       </Modal>
-
-//       {weeks.length > 0 ? (
-//         weeks.map((weekDays, weekIdx) => (
-//           <table className="schedule-table" key={weekIdx}>
-//             <thead>
-//               <tr>
-//                 <th rowSpan="3" className="region-col">Region</th>
-//                 <th rowSpan="3" className="sub-col">Sub Item</th>
-//                 {weekDays.map((d, i) => (
-//                   <th key={i} colSpan={shifts.length} className="day-header">
-//                     {d.format("dddd")}
-//                   </th>
-//                 ))}
-//               </tr>
-//               <tr>
-//                 {weekDays.map((d, i) => (
-//                   <th key={i} colSpan={shifts.length} className="date-cell">
-//                     {d.format("DD-MM")}
-//                   </th>
-//                 ))}
-//               </tr>
-//               <tr className="shift-row">
-//                 {weekDays.map((_, i) =>
-//                   shifts.map((s, idx) => (
-//                     <th
-//                       key={`${i}-${s}`}
-//                       className={`shift-cell ${idx === 2 ? "black-separator" : ""}`}
-//                     >
-//                       {s}
-//                     </th>
-//                   ))
-//                 )}
-//               </tr>
-//             </thead>
-
-//             <tbody>
-//               {regions.map((region) =>
-//                 region.subItems.map((sub, i) => (
-//                   <tr key={`${region.name}-${sub}`}>
-//                     {i === 0 && (
-//                       <td rowSpan={region.subItems.length} className="region-name">
-//                         {region.name}
-//                       </td>
-//                     )}
-//                     <td className="sub-name">{sub}</td>
-
-//                     {weekDays.map((d, dayIdx) =>
-//                       shifts.map((s, shiftIdx) => {
-//                         const mergedEvent = eventList.find(
-//                           (ev) =>
-//                             ev.merged &&
-//                             ev.parts[0].date.isSame(d, "day") &&
-//                             ev.parts[0].shift === s &&
-//                             ev.parts[0].region === region.name &&
-//                             ev.parts[0].subItem === sub
-//                         );
-
-//                         if (mergedEvent) {
-//                           const totalCells = mergedEvent.parts.length;
-//                           const totalHours = mergedEvent.parts.reduce(
-//                             (sum, p) => sum + p.hours,
-//                             0
-//                           );
-//                           const firstPart = mergedEvent.parts[0];
-
-//                           // ✅ FIXED: mark black only if the WHOLE event ends at shift 2
-//                           const lastPart = mergedEvent.parts[mergedEvent.parts.length - 1];
-//                           const coversShift2 = lastPart && lastPart.shift === 2;
-
-//                           const eventKey = `${region.name}-${sub}-${d.format(
-//                             "YYYY-MM-DD"
-//                           )}-${firstPart.test}`;
-
-//                           return (
-//                             <td
-//                               key={`${dayIdx}-${s}`}
-//                               colSpan={totalCells}
-//                               className={`cell shift-cell ${coversShift2 ? "black-separator" : ""}`}
-//                             >
-//                               <div
-//                                 className="event-block"
-//                                 style={{
-//                                   backgroundColor: firstPart.color,
-//                                   color: "black",
-//                                   height: "100%",
-//                                   width: `${(totalHours / (8 * totalCells)) * 100}%`,
-//                                   textAlign: "left",
-//                                   cursor: (witnessActive || splitActive) ? "pointer" : "default",
-//                                 }}
-//                                 onClick={() => {
-//                                   if (witnessActive) handleToggleStar(eventKey);
-//                                   if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-//                                 }}
-//                               >
-//                                 <span className="event-text">
-//                                   {firstPart.label}
-//                                   {witnessTests.has(eventKey) && (
-//                                     <span className="event-star">⭐</span>
-//                                   )}
-//                                 </span>
-//                               </div>
-//                             </td>
-//                           );
-//                         }
-
-//                         const insideSpan = eventList.some(
-//                           (ev) =>
-//                             ev.merged &&
-//                             ev.parts.some(
-//                               (p) =>
-//                                 p.date.isSame(d, "day") &&
-//                                 p.shift === s &&
-//                                 p.region === region.name &&
-//                                 p.subItem === sub
-//                             )
-//                         );
-//                         if (insideSpan) return null;
-
-//                         return (
-//                           <td
-//                             key={`${dayIdx}-${s}`}
-//                             className={`cell shift-cell ${
-//                               shiftIdx === 2 ? "black-separator" : ""
-//                             }`}
-//                           />
-//                         );
-//                       })
-//                     )}
-//                   </tr>
-//                 ))
-//               )}
-//             </tbody>
-//           </table>
-//         ))
-//       ) : (
-//         <p>No dates to show</p>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default MonthlyDataGrid;
-
-// // // ------------------------- using react konva ------------------------------------------------------
-// //-------------------------------24-09-2025--------------------------------
-// import React, { useState } from "react";
-// import { DatePicker, Modal, message, Slider, Radio, Anchor } from "antd";
-// import dayjs from "dayjs";
-// import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-// import "./MonthlyDataGrid.css";
-
-// dayjs.extend(isSameOrBefore);
-
-// const { RangePicker } = DatePicker;
-
-// const regions = [
-//   { name: "EHV", subItems: ["Impulse", "LMS", "Others"] },
-//   { name: "NORTH", subItems: ["Impulse", "LMS", "Others"] },
-//   { name: "SOUTH", subItems: ["Impulse", "LMS", "Others"] },
-// ];
-
-// const shifts = [3, 1, 2];
-
-// const TEST_STYLES = {
-//   SfraA1: { color: "red", text: "SfraA1" },
-//   SfraA2: { color: "yellow", text: "SfraA2" },
-//   TestA1: { color: "lightblue", text: "Test A1" },
-// };
-
-// const SHIFT_ORDER = [3, 1, 2];
-// const nextShiftAndDate = (shift, date) => {
-//   const idx = SHIFT_ORDER.indexOf(shift);
-//   if (idx === -1 || idx === SHIFT_ORDER.length - 1) {
-//     return { shift: SHIFT_ORDER[0], date: date.add(1, "day") };
-//   }
-//   return { shift: SHIFT_ORDER[idx + 1], date };
-// };
-
-// function MonthlyDataGrid() {
-//   const [showCalendar, setShowCalendar] = useState(false);
-//   const [tempRange, setTempRange] = useState([]);
-//   const [eventList, setEventList] = useState([]);
-
-//   const [daysArray, setDaysArray] = useState(() => {
-//     const base = dayjs("2025-10-01");
-//     return Array.from({ length: base.daysInMonth() }, (_, i) =>
-//       base.date(i + 1)
-//     );
-//   });
-
-//   const getWeeks = (days) => {
-//     const weeks = [];
-//     for (let i = 0; i < days.length; i += 7) {
-//       weeks.push(days.slice(i, i + 7));
-//     }
-//     return weeks;
-//   };
-
-//   const applyDateRange = () => {
-//     if (!tempRange || tempRange.length !== 2) {
-//       message.error("Please select both start and end dates!");
-//       return;
-//     }
-//     const [start, end] = tempRange;
-//     let current = start.startOf("day");
-
-//     if (end.diff(start, "day") + 1 > 28) {
-//       message.error("Date range cannot exceed 28 days.");
-//       return;
-//     }
-
-//     const selectedDays = [];
-//     while (current.isSameOrBefore(end, "day")) {
-//       selectedDays.push(current);
-//       current = current.add(1, "day");
-//     }
-
-//     setDaysArray(selectedDays);
-//     setShowCalendar(false);
-//   };
-
-//   const handleCancel = () => {
-//     setTempRange([]);
-//     setShowCalendar(false);
-//   };
-
-//   const weeks = getWeeks(daysArray);
-
-//   const [showCreateTest, setShowCreateTest] = useState(false);
-//   const [testForm, setTestForm] = useState({
-//     name: "",
-//     date: null,
-//     region: "",
-//     hours: "",
-//     shift: "",
-//   });
-
-//   const handleCreateTest = () => {
-//     const { name, date, region, hours, shift } = testForm;
-
-//     if (!name || !TEST_STYLES[name]) {
-//       message.error("Please select a test.");
-//       return;
-//     }
-//     if (!date) {
-//       message.error("Please select a start date.");
-//       return;
-//     }
-//     if (date.isBefore(dayjs("2025-08-01"), "day")) {
-//       message.error("Start date must be on/after 01-08-2025.");
-//       return;
-//     }
-//     if (!region.includes("-")) {
-//       message.error("Please select region and sub item.");
-//       return;
-//     }
-//     const hrs = Number(hours);
-//     if (!hrs || hrs <= 0) {
-//       message.error("Hours must be positive.");
-//       return;
-//     }
-//     const shiftNum = Number(shift);
-//     if (!SHIFT_ORDER.includes(shiftNum)) {
-//       message.error("Invalid shift.");
-//       return;
-//     }
-
-//     const [regionName, subItemName] = region.split("-");
-
-//     let remaining = hrs;
-//     let currentDate = date.startOf("day");
-//     let currentShift = shiftNum;
-//     const toAdd = [];
-
-//     while (remaining > 0) {
-//       const allot = Math.min(8, remaining);
-//       toAdd.push({
-//         date: currentDate,
-//         shift: currentShift,
-//         region: regionName,
-//         subItem: subItemName,
-//         test: name,
-//         color: TEST_STYLES[name].color,
-//         label: TEST_STYLES[name].text,
-//         hours: allot,
-//       });
-//       remaining -= allot;
-//       const next = nextShiftAndDate(currentShift, currentDate);
-//       currentShift = next.shift;
-//       currentDate = next.date;
-//     }
-
-//     setEventList((prev) => [...prev, { merged: true, parts: toAdd }]);
-//     setShowCreateTest(false);
-//     setTestForm({ name: "", date: null, region: "", hours: "", shift: "" });
-//   };
-
-//   // 🔹 Customer Witness
-//   const [witnessActive, setWitnessActive] = useState(false);
-//   const [witnessTests, setWitnessTests] = useState(new Set());
-
-//   const handleToggleWitness = () => {
-//     setWitnessActive((prev) => !prev);
-//   };
-
-//   const handleToggleStar = (eventKey) => {
-//     if (!witnessActive) return;
-//     setWitnessTests((prev) => {
-//       const newSet = new Set(prev);
-//       if (newSet.has(eventKey)) newSet.delete(eventKey);
-//       else newSet.add(eventKey);
-//       return newSet;
-//     });
-//   };
-
-//   // 🔹 Split Event Logic
-//   const [splitActive, setSplitActive] = useState(false);
-
-//   const handleToggleSplit = () => {
-//     setSplitActive((prev) => !prev);
-//   };
-
-//   // ---- New split modal state (minimal additions) ----
-//   const [splitModalVisible, setSplitModalVisible] = useState(false);
-//   const [splitPercent, setSplitPercent] = useState(50); // 1..99
-//   const [splitSide, setSplitSide] = useState("left"); // 'left' or 'right'
-//   const [eventToSplit, setEventToSplit] = useState(null);
-//   // ----------------------------------------------------
-
-//   const handleSplitEvent = (eventKey, mergedEvent) => {
-//     // mergedEvent may be a shallow copy (for a week slice) with _original pointing to the real full event.
-//     const fullEvent =
-//       mergedEvent._original ||
-//       eventList.find(
-//         (ev) =>
-//           ev.merged &&
-//           ev.parts[0].date.isSame(
-//             (mergedEvent.parts &&
-//               mergedEvent.parts[0] &&
-//               mergedEvent.parts[0].date) ||
-//               mergedEvent.parts[0].date,
-//             "day"
-//           ) &&
-//           ev.parts[0].shift === mergedEvent.parts[0].shift &&
-//           ev.parts[0].region === mergedEvent.parts[0].region &&
-//           ev.parts[0].subItem === mergedEvent.parts[0].subItem &&
-//           ev.parts[0].test === mergedEvent.parts[0].test
-//       );
-
-//     if (!fullEvent) return;
-
-//     // If already split, keep original reset behavior (confirm reset)
-//     if (fullEvent.split) {
-//       Modal.confirm({
-//         title: "Reset Split",
-//         content:
-//           "This event is already split. Do you want to reset it back to original?",
-//         onOk: () => {
-//           setEventList((prev) =>
-//             prev.map((ev) =>
-//               ev === fullEvent ? { ...ev, split: false, splitAt: null } : ev
-//             )
-//           );
-//           message.success("Event reset to original!");
-//         },
-//         onCancel: () => {
-//           message.info("This is not able to split because it is already split.");
-//         },
-//       });
-//       return;
-//     }
-
-//     // Open the percentage split modal for this event
-//     setEventToSplit(fullEvent);
-//     setSplitPercent(50);
-//     setSplitSide("left");
-//     setSplitModalVisible(true);
-//   };
-
-//   // Apply the split chosen in modal: compute left hours (splitAt) and set on the full event
-//   const applySplitFromModal = () => {
-//     const fullEvent = eventToSplit;
-//     if (!fullEvent) {
-//       setSplitModalVisible(false);
-//       return;
-//     }
-
-//     const totalHours = fullEvent.parts.reduce((s, p) => s + p.hours, 0);
-//     // compute left hours according to selected side+percent
-//     const pct = Math.max(1, Math.min(99, Number(splitPercent || 50)));
-//     let leftHours;
-//     if (splitSide === "left") {
-//       leftHours = Math.round((totalHours * pct) / 100);
-//     } else {
-//       const rightHours = Math.round((totalHours * pct) / 100);
-//       leftHours = totalHours - rightHours;
-//     }
-
-//     // ensure at least 1 hour on each side and not exceed total
-//     if (leftHours < 1) leftHours = 1;
-//     if (leftHours > totalHours - 1) leftHours = totalHours - 1;
-
-//     // final sanity: ensure sum equals totalHours
-//     const rightHoursFinal = totalHours - leftHours;
-
-//     if (leftHours <= 0 || rightHoursFinal <= 0) {
-//       message.error("Split results in invalid hour distribution. Choose different percentage.");
-//       return;
-//     }
-
-//     setEventList((prev) =>
-//       prev.map((ev) =>
-//         ev === fullEvent ? { ...ev, split: true, splitAt: leftHours } : ev
-//       )
-//     );
-
-//     setSplitModalVisible(false);
-//     setEventToSplit(null);
-//     message.success(
-//       `Test split applied: left ${leftHours}h / right ${rightHoursFinal}h (${pct}% on ${splitSide})`
-//     );
-//   };
-
-//   return (
-//     <div className="monthly-grid-container">
-//       <h2 className="title">Monthly Data</h2>
-
-//       <div className="buttons">
-//         <button
-//           onClick={handleToggleWitness}
-//           style={{ position: "relative", paddingRight: "20px" }}
-//         >
-//           Add Customer Witness
-//           {witnessActive && <span className="witness-dot"></span>}
-//         </button>
-
-//         <button
-//           onClick={handleToggleSplit}
-//           style={{ position: "relative", paddingRight: "20px" }}
-//         >
-//           Split Selected Vertically
-//           {splitActive && <span className="witness-dot"></span>}
-//         </button>
-
-//         <button onClick={() => setShowCalendar(true)}>Calendar</button>
-//         <button onClick={() => setShowCreateTest(true)}>Create Test</button>
-//         <button>Delete Test</button>
-//       </div>
-
-//       {/* Calendar Modal */}
-//       <Modal
-//         title="Select Date Range"
-//         open={showCalendar}
-//         onOk={applyDateRange}
-//         onCancel={handleCancel}
-//         okText="OK"
-//       >
-//         <RangePicker
-//           value={tempRange}
-//           onChange={(values) => setTempRange(values || [])}
-//           defaultPickerValue={[dayjs("2025-08-01"), dayjs("2025-08-01")]}
-//           disabledDate={(current) =>
-//             current && current.isBefore(dayjs("2025-08-01"), "day")
-//           }
-//         />
-//       </Modal>
-
-//       {/* Create Test Modal */}
-//       <Modal
-//         title="Create Test"
-//         open={showCreateTest}
-//         onOk={handleCreateTest}
-//         onCancel={() => setShowCreateTest(false)}
-//         okText="Create"
-//         className="create-test-modal"
-//       >
-//         <div className="form-group">
-//           <label>Name of the Test</label>
-//           <select
-//             className="form-control"
-//             value={testForm.name}
-//             onChange={(e) => setTestForm({ ...testForm, name: e.target.value })}
-//           >
-//             <option value="">Select Test</option>
-//             <option value="SfraA1">SfraA1</option>
-//             <option value="SfraA2">SfraA2</option>
-//             <option value="TestA1">TestA1</option>
-//           </select>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Date to Start</label>
-//           <DatePicker
-//             value={testForm.date}
-//             onChange={(date) => setTestForm({ ...testForm, date })}
-//             disabledDate={(current) =>
-//               current && current.isBefore(dayjs("2025-08-01"), "day")
-//             }
-//             className="form-control"
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label>Region</label>
-//           <select
-//             className="form-control"
-//             value={testForm.region}
-//             onChange={(e) =>
-//               setTestForm({ ...testForm, region: e.target.value })
-//             }
-//           >
-//             <option value="">Select Region</option>
-//             {regions.map((reg) => (
-//               <optgroup key={reg.name} label={reg.name}>
-//                 {reg.subItems.map((sub) => (
-//                   <option key={`${reg.name}-${sub}`} value={`${reg.name}-${sub}`}>
-//                     {sub}
-//                   </option>
-//                 ))}
-//               </optgroup>
-//             ))}
-//           </select>
-//         </div>
-
-//         <div className="form-group">
-//           <label>Test Hours</label>
-//           <input
-//             type="number"
-//             className="form-control"
-//             value={testForm.hours}
-//             onChange={(e) =>
-//               setTestForm({ ...testForm, hours: parseInt(e.target.value, 10) })
-//             }
-//             placeholder="Enter hours"
-//             min={1}
-//           />
-//         </div>
-
-//         <div className="form-group">
-//           <label>Shift</label>
-//           <select
-//             className="form-control"
-//             value={testForm.shift}
-//             onChange={(e) =>
-//               setTestForm({ ...testForm, shift: e.target.value })
-//             }
-//           >
-//             <option value="">Select Shift</option>
-//             <option value="3">3</option>
-//             <option value="1">1</option>
-//             <option value="2">2</option>
-//           </select>
-//         </div>
-//       </Modal>
-
-//       {/* Split-percentage Modal (new) */}
-//       <Modal
-//         title={
-//           eventToSplit
-//             ? `Split "${eventToSplit.parts[0].label || eventToSplit.parts[0].test}"`
-//             : "Split Test"
-//         }
-//         open={splitModalVisible}
-//         onOk={applySplitFromModal}
-//         onCancel={() => {
-//           setSplitModalVisible(false);
-//           setEventToSplit(null);
-//         }}
-//         okText="Apply Split"
-//       >
-//         <div style={{ marginBottom: 12 }}>
-//           <div style={{ marginBottom: 8 }}>
-//             <strong>Choose percentage (1 - 99)</strong>
-//           </div>
-//           <Slider
-//             min={1}
-//             max={99}
-//             value={splitPercent}
-//             onChange={(val) => setSplitPercent(val)}
-//             tooltipVisible
-//           />
-//           <div style={{ marginTop: 8, textAlign: "center" }}>
-//             <span style={{ fontWeight: 600 }}>{splitPercent}%</span>
-//           </div>
-//         </div>
-
-//         <div style={{ marginTop: 8 }}>
-//           <div style={{ marginBottom: 8 }}>
-//             <strong>Apply percentage to</strong>
-//           </div>
-//           <Radio.Group
-//             onChange={(e) => setSplitSide(e.target.value)}
-//             value={splitSide}
-//           >
-//             <Radio value="left">Left</Radio>
-//             <Radio value="right">Right</Radio>
-//           </Radio.Group>
-//         </div>
-
-//         <div style={{ marginTop: 12, color: "#666", fontSize: 13 }}>
-//           <div>
-//             Example: if total hours = 24 and you choose <b>{splitPercent}%</b> on{" "}
-//             <b>{splitSide}</b>, distribution will be computed in hours and stored.
-//           </div>
-//         </div>
-//       </Modal>
-
-//       {weeks.length > 0 ? (
-//         weeks.map((weekDays, weekIdx) => (
-//           <table className="schedule-table" key={weekIdx}>
-//             <thead>
-//               <tr>
-//                 <th rowSpan="3" className="region-col">
-//                   Region
-//                 </th>
-//                 <th rowSpan="3" className="sub-col">
-//                   Sub Item
-//                 </th>
-//                 {weekDays.map((d, i) => (
-//                   <th key={i} colSpan={shifts.length} className="day-header">
-//                     {d.format("dddd")}
-//                   </th>
-//                 ))}
-//               </tr>
-//               <tr>
-//                 {weekDays.map((d, i) => (
-//                   <th key={i} colSpan={shifts.length} className="date-cell">
-//                     {d.format("DD-MM")}
-//                   </th>
-//                 ))}
-//               </tr>
-//               <tr className="shift-row">
-//                 {weekDays.map((_, i) =>
-//                   shifts.map((s, idx) => (
-//                     <th
-//                       key={`${i}-${s}`}
-//                       className={`shift-cell ${idx === 2 ? "black-separator" : ""}`}
-//                     >
-//                       {s}
-//                     </th>
-//                   ))
-//                 )}
-//               </tr>
-//             </thead>
-
-//             <tbody>
-//               {regions.map((region) =>
-//                 region.subItems.map((sub, i) => (
-//                   <tr key={`${region.name}-${sub}`}>
-//                     {i === 0 && (
-//                       <td rowSpan={region.subItems.length} className="region-name">
-//                         {region.name}
-//                       </td>
-//                     )}
-//                     <td className="sub-name">{sub}</td>
-
-//                     {weekDays.map((d, dayIdx) =>
-//                       shifts.map((s, shiftIdx) => {
-//                         // === NEW merged-event selection (robust & week-sliced) ===
-//                         let mergedEvent = null;
-
-//                         // find any event that contains a part for this exact cell
-//                         const evContaining = eventList.find((ev) =>
-//                           ev.merged &&
-//                           ev.parts.some(
-//                             (p) =>
-//                               p.date.isSame(d, "day") &&
-//                               p.shift === s &&
-//                               p.region === region.name &&
-//                               p.subItem === sub
-//                           )
-//                         );
-
-//                         if (evContaining) {
-//                           // limit rendering to the contiguous parts that fall inside this WEEK
-//                           const currentWeekStart = weekDays[0];
-//                           const currentWeekEnd = weekDays[weekDays.length - 1];
-
-//                           // get indices of all parts that fall inside this week
-//                           const indicesInWeek = evContaining.parts
-//                             .map((p, idx) => ({ p, idx }))
-//                             .filter(
-//                               ({ p }) =>
-//                                 !p.date.isBefore(currentWeekStart, "day") &&
-//                                 !p.date.isAfter(currentWeekEnd, "day")
-//                             )
-//                             .map(({ idx }) => idx);
-
-//                           if (indicesInWeek.length > 0) {
-//                             const firstWeekPartIdx = indicesInWeek[0];
-//                             const lastWeekPartIdx = indicesInWeek[indicesInWeek.length - 1];
-
-//                             // index of this specific cell inside the event parts
-//                             const currentPartIndex = evContaining.parts.findIndex(
-//                               (p) =>
-//                                 p.date.isSame(d, "day") &&
-//                                 p.shift === s &&
-//                                 p.region === region.name &&
-//                                 p.subItem === sub
-//                             );
-
-//                             // Only render a merged block at the FIRST visible part inside the week
-//                             if (currentPartIndex === firstWeekPartIdx) {
-//                               const partsFromHere = evContaining.parts.slice(
-//                                 firstWeekPartIdx,
-//                                 lastWeekPartIdx + 1
-//                               );
-//                               mergedEvent = { ...evContaining, parts: partsFromHere, _original: evContaining };
-//                             }
-//                             // otherwise: this cell is inside the block but not the first visible part -> we will return null later
-//                           }
-//                         }
-
-//                         // === end merged-event selection ===
-
-//                         if (mergedEvent) {
-//                           const totalCells = mergedEvent.parts.length;
-//                           const totalHours = mergedEvent.parts.reduce(
-//                             (sum, p) => sum + p.hours,
-//                             0
-//                           );
-//                           const firstPart = mergedEvent.parts[0];
-
-//                           const lastPart =
-//                             mergedEvent.parts[mergedEvent.parts.length - 1];
-//                           const coversShift2 = lastPart && lastPart.shift === 2;
-
-                          
-//                           const originalEv = mergedEvent._original || mergedEvent;
-//                           const eventKey = `${region.name}-${sub}-${originalEv.parts[0].date.format(
-//                             "YYYY-MM-DD"
-//                           )}-${originalEv.parts[0].test}`;
-
-//                           // handle split rendering: show split only if the global split point falls inside THIS visible slice
-//                           const isSplit = Boolean(originalEv.split);
-//                           const splitAtGlobal = originalEv.splitAt ?? null;
-
-//                           let shouldRenderSplitHere = false;
-//                           let leftPct = 50;
-//                           let rightPct = 50;
-
-//                           if (isSplit && splitAtGlobal != null) {
-//                             // find index of mergedEvent.parts[0] inside the original event
-//                             const idxInOriginal = originalEv.parts.findIndex(
-//                               (p) =>
-//                                 p.date.isSame(firstPart.date, "day") &&
-//                                 p.shift === firstPart.shift &&
-//                                 p.region === firstPart.region &&
-//                                 p.subItem === firstPart.subItem &&
-//                                 p.test === firstPart.test
-//                             );
-
-//                             // prefix hours before this visible slice
-//                             let prefixHours = 0;
-//                             for (let k = 0; k < idxInOriginal; k++) {
-//                               prefixHours += originalEv.parts[k].hours;
-//                             }
-
-//                             const sliceHours = mergedEvent.parts.reduce((s, p) => s + p.hours, 0);
-
-//                             // split point lies inside this slice?
-//                             if (splitAtGlobal > prefixHours && splitAtGlobal < prefixHours + sliceHours) {
-//                               shouldRenderSplitHere = true;
-//                               const localSplitHours = splitAtGlobal - prefixHours;
-//                               leftPct = (localSplitHours / sliceHours) * 100;
-//                               rightPct = 100 - leftPct;
-//                             } else {
-//                               shouldRenderSplitHere = false;
-//                             }
-//                           }
-
-//                           if (isSplit && shouldRenderSplitHere) {
-//                             const colorLeft = mergedEvent.parts[0].color;
-//                             const colorRight = mergedEvent.parts[0].color;
-
-//                             const leftKey = `${eventKey}-left`;
-//                             const rightKey = `${eventKey}-right`;
-
-//                             return (
-//                               <td
-//                                 key={`${dayIdx}-${s}`}
-//                                 colSpan={totalCells}
-//                                 className={`cell shift-cell ${coversShift2 ? "black-separator" : ""}`}
-//                                 style={{ padding: 0 }}
-//                               >
-//                                 <div
-//                                   style={{
-//                                     display: "flex",
-//                                     width: `${(totalHours / (8 * totalCells)) * 100}%`,
-//                                     height: "100%",
-//                                   }}
-//                                 >
-//                                   <div
-//                                     onClick={() => {
-//                                       if (witnessActive) handleToggleStar(leftKey);
-//                                       if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-//                                     }}
-//                                     style={{
-//                                       width: `${leftPct}%`,
-//                                       height: "100%",
-//                                       display: "flex",
-//                                       alignItems: "center",
-//                                       justifyContent: "center",
-//                                       backgroundColor: colorLeft,
-//                                       boxSizing: "border-box",
-//                                       textAlign: "center",
-//                                       borderRadius: "4px",
-//                                       cursor:
-//                                         witnessActive || splitActive ? "pointer" : "default",
-//                                     }}
-//                                   >
-//                                     <span className="event-text">
-//                                       {firstPart.label}
-//                                       {witnessTests.has(leftKey) && (
-//                                         <span className="event-star">⭐</span>
-//                                       )}
-//                                     </span>
-//                                   </div>
-
-//                                   <div
-//                                     onClick={() => {
-//                                       if (witnessActive) handleToggleStar(rightKey);
-//                                       if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-//                                     }}
-//                                     style={{
-//                                       width: `${rightPct}%`,
-//                                       height: "100%",
-//                                       display: "flex",
-//                                       alignItems: "center",
-//                                       justifyContent: "center",
-//                                       backgroundColor: colorRight,
-//                                       boxSizing: "border-box",
-//                                       textAlign: "center",
-//                                       borderRadius: "4px",
-//                                       borderLeft: "1px solid black",
-//                                       cursor:
-//                                         witnessActive || splitActive ? "pointer" : "default",
-//                                     }}
-//                                   >
-//                                     <span className="event-text">
-//                                       {firstPart.label}
-//                                       {witnessTests.has(rightKey) && (
-//                                         <span className="event-star">⭐</span>
-//                                       )}
-//                                     </span>
-//                                   </div>
-//                                 </div>
-//                               </td>
-//                             );
-//                           }
-
-//                           return (
-//                             <td
-//                               key={`${dayIdx}-${s}`}
-//                               colSpan={totalCells}
-//                               className={`cell shift-cell ${
-//                                 coversShift2 ? "black-separator" : ""
-//                               }`}
-//                             >
-//                               <div
-//                                 className="event-block"
-//                                 style={{
-//                                   backgroundColor: firstPart.color,
-//                                   color: "black",
-//                                   height: "100%",
-//                                   width: `${(totalHours / (8 * totalCells)) * 100}%`,
-//                                   textAlign: "left",
-//                                   cursor:
-//                                     witnessActive || splitActive ? "pointer" : "default",
-//                                 }}
-//                                 onClick={() => {
-//                                   if (witnessActive) handleToggleStar(eventKey);
-//                                   if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-//                                 }}
-//                               >
-//                                 <span className="event-text">
-//                                   {firstPart.label}
-//                                   {witnessTests.has(eventKey) && (
-//                                     <span className="event-star">⭐</span>
-//                                   )}
-//                                 </span>
-//                               </div>
-//                             </td>
-//                           );
-//                         }
-
-//                         const insideSpan = eventList.some(
-//                           (ev) =>
-//                             ev.merged &&
-//                             ev.parts.some(
-//                               (p) =>
-//                                 p.date.isSame(d, "day") &&
-//                                 p.shift === s &&
-//                                 p.region === region.name &&
-//                                 p.subItem === sub
-//                             )
-//                         );
-//                         if (insideSpan) return null;
-
-//                         return (
-//                           <td
-//                             key={`${dayIdx}-${s}`}
-//                             className={`cell shift-cell ${
-//                               shiftIdx === 2 ? "black-separator" : ""
-//                             }`}
-//                           />
-//                         );
-//                       })
-//                     )}
-//                   </tr>
-//                 ))
-//               )}
-//             </tbody>
-//           </table>
-//         ))
-//       ) : (
-//         <p>No dates to show</p>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default MonthlyDataGrid;
-
-
-import React, { useState } from "react";
-import { DatePicker, Modal, message, Slider, Radio } from "antd"; 
+  Modal,
+  message,
+  
+  Select,
+  Button,
+  
+  Card,
+  Space,
+  Tag,
+} from "antd";
+import {
+  Stage,
+  Layer,
+  Rect,
+  Text,
+  Group,
+  Star,
+} from "react-konva";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isoWeek from "dayjs/plugin/isoWeek";
 import "./MonthlyDataGrid.css";
-
+import PlannerSetup from "./PlannerSetup";
+import PlannerToolbar from "./PlannerToolbar";
+import TestQueue from "./TestQueue";
+import TransformerModal from "./TransformerModal";
 dayjs.extend(isSameOrBefore);
-
-const { RangePicker } = DatePicker;
-
+dayjs.extend(isoWeek);
 const regions = [
   { name: "EHV", subItems: ["Impulse", "LMS", "Others"] },
-  { name: "NORTH", subItems: ["Impulse", "LMS", "Others"] },  
+  { name: "NORTH", subItems: ["Impulse", "LMS", "Others"] },
   { name: "SOUTH", subItems: ["Impulse", "LMS", "Others"] },
-];
-
+  ];
 const shifts = [3, 1, 2];
+const TRANSFORMERS = [
+  "WT07226",
+  "WT07347",
+  "WT07348",
+  "WT07380",
+  "WT07224",
+  "WT07015",
+  "WT07365",
+  "WT06900",
+  "WT06782",
+  "WT06471",
+  "WT07318",
+  "WT06599",
+  "WT07369",
+  "WT07329",
+  "WT05187"
+  ];
+const TRANSFORMER_COLORS = {
 
-const TEST_STYLES = {
-  SfraA1: { color: "red", text: "SfraA1" },
-  SfraA2: { color: "yellow", text: "SfraA2" },
-  TestA1: { color: "lightblue", text: "Test A1" },
+  WT07226: "#ff7875",
+
+  WT07347: "#ffd666",
+
+  WT07348: "#95de64",
+
+  WT07380: "#69c0ff",
+
+  WT07224: "#b37feb",
+
+  WT07015: "#ff9c6e",
+
+  WT07365: "#5cdbd3",
+
+  WT06900: "#597ef7",
+
+  WT06782: "#73d13d",
+
+  WT06471: "#36cfc9",
+
+  WT07318: "#ffc069",
+
+  WT06599: "#9254de",
+
+  WT07369: "#13c2c2",
+
+  WT07329: "#fa8c16",
+
+  WT05187: "#f759ab",
 };
+const GROUP_COLORS = [
+  "#E53935",
+  "#3949AB",
+  "#00897B",
+  "#8E24AA",
+  "#6D4C41",
+  "#F4511E",
+  "#546E7A",
+  "#C2185B",
+  "#2E7D32",
+  "#1565C0",
+  ];
 
 const SHIFT_ORDER = [3, 1, 2];
 const nextShiftAndDate = (shift, date) => {
   const idx = SHIFT_ORDER.indexOf(shift);
   if (idx === -1 || idx === SHIFT_ORDER.length - 1) {
-    return { shift: SHIFT_ORDER[0], date: date.add(1, "day") };//move to the first shift of the next day it increment the next day
+    return { shift: SHIFT_ORDER[0], date: date.add(1, "day") };
   }
-  return { shift: SHIFT_ORDER[idx + 1], date };//just move to next day shift . it does not increament the day 
+return { shift: SHIFT_ORDER[idx + 1], date };
+// next shift within the same day.
 };
+const ALL_ROWS = [];
+regions.forEach(region => {
 
+    region.subItems.forEach(subItem => {
+        ALL_ROWS.push({
+            region: region.name,
+            subItem,
+          });
 
+    });
+
+});
+const ROWS_PER_WEEK = ALL_ROWS.length; 
+const getRowIndex = ( region,subItem) =>
+ALL_ROWS.findIndex(
+  r =>
+  r.region === region && r.subItem === subItem );
 function MonthlyDataGrid() {
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [tempRange, setTempRange] = useState([]);
+
+  const [selectedMonth, setSelectedMonth] = useState(null);
+
+  const [showPlannerPage, setShowPlannerPage] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const [selectedWeekRange, setSelectedWeekRange] = useState(null);
+
+  const [draggingQueueEvent, setDraggingQueueEvent] = useState(null);
+
   const [eventList, setEventList] = useState([]);
+  const stageRef = useRef(null);
+
+  const dragInfoRef = useRef(null);
+
+  const [pendingEvents, setPendingEvents] = useState([]);
+
+  const [expandedTransformers, setExpandedTransformers] = useState({});
+
+  const [isSelectingWeekRange, setIsSelectingWeekRange] = useState(false);
+
+  const [selectedTransformers, setSelectedTransformer] = useState([])
+  const [selectedVersion, setSelectedVersion] =
+  useState(undefined);
+
+  const [plannerTransformers, setPlannerTransformers] =
+  useState([]);
+  const [availablePlannerTransformers, setAvailablePlannerTransformers] =
+  useState([]);
+
+  const [selectedPlannerTransformer, setSelectedPlannerTransformer] =
+  useState([]);
+  const [addTransformerModalOpen, setAddTransformerModalOpen] =
+  useState(false);
+  const [modalTransformers, setModalTransformers] = useState([]);
+
+  const [transformerCustomerMap, setTransformerCustomerMap] = useState({});
 
   const [daysArray, setDaysArray] = useState(() => {
-    const base = dayjs("2025-11-01");
-    return Array.from({ length: base.daysInMonth() }, (_, i) =>
-      base.date(i + 1)// creates new date
-    );
-  });
-
-  const getWeeks = (days) => {
-    const weeks = [];
-    for (let i = 0; i < days.length; i += 7) {
-      weeks.push(days.slice(i, i + 7));
-    }
-    return weeks;
-  };
-//below function appliesthe user selected range 
-  const applyDateRange = () => {
-    if (!tempRange || tempRange.length !== 2) {
-      message.error("Please select both start and end dates");
-      return;
-    }
-    const [start, end] = tempRange;    let current = start.startOf("day");
-
-    if (end.diff(start, "day") + 1 > 28) {
-      message.error("Date range cannot exceed 28 days.");
-      return;
-    }
-
-    const selectedDays = [];
-    while (current.isSameOrBefore(end, "day")) {
-      selectedDays.push(current);
-      current = current.add(1, "day");
-    }
-
-    setDaysArray(selectedDays);
-    setShowCalendar(false);
-  };
-
-  const handleCancel = () => {
-    setTempRange([]);
-    setShowCalendar(false);
-  };
-
-  const weeks = getWeeks(daysArray);
-
-  const [showCreateTest, setShowCreateTest] = useState(false);
-  const [testForm, setTestForm] = useState({
-    name: "",
-    date: null,
-    region: "",
-    hours: "",
-    shift: "",
-  });
-
-  const handleCreateTest = () => {
-    const { name, date, region, hours, shift } = testForm;
-
-    if (!name || !TEST_STYLES[name]) {
-      message.error("Please select a test.");
-      return;
-    }
-    if (!date) {
-      message.error("Please select a start date.");
-      return;
-    }
-    if (date.isBefore(dayjs("2025-09-01"), "day")) {
-      message.error("Start date must be on/after 01-08-2025.");
-      return;
-    }
-    if (!region.includes("-")) {
-      message.error("Please select region and sub item.");
-      return;
-    }
-    const hrs = Number(hours);
-    if (!hrs || hrs <= 0) {
-      message.error("Hours must be positive.");
-      return;
-    }
-    const shiftNum = Number(shift);
-    if (!SHIFT_ORDER.includes(shiftNum)) {
-      message.error("Invalid shift.");
-      return;
-    }
-
-    const [regionName, subItemName] = region.split("-");
-
-    let remaining = hrs;
-    let currentDate = date.startOf("day");
-    let currentShift = shiftNum;
-    const toAdd = [];// this empty array saves like Test A1 : 10 hours starting shift 3
-
-
-    while (remaining > 0) {
-      const allot = Math.min(8, remaining);
-      toAdd.push({
-        date: currentDate,
-        shift: currentShift,
-        region: regionName,
-        subItem: subItemName,
-        test: name,
-        color: TEST_STYLES[name].color,
-        label: TEST_STYLES[name].text,
-        hours: allot,
-      });
-      remaining -= allot;
-      const next = nextShiftAndDate(currentShift, currentDate);
-      currentShift = next.shift;
-      currentDate = next.date;
-    }
-
-    setEventList((prev) => [...prev, { merged: true, parts: toAdd }]);
-    setShowCreateTest(false);
-    setTestForm({ name: "", date: null, region: "", hours: "", shift: "" });
-  };
-
-  const [witnessActive, setWitnessActive] = useState(false);
-  const [witnessTests, setWitnessTests] = useState(new Set());
-  
-  const handleToggleWitness = () => {
-    setWitnessActive((prev) => !prev);
-  };
-
-  const handleToggleStar = (eventKey) => {
-    if (!witnessActive) return;
-    setWitnessTests((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(eventKey)) newSet.delete(eventKey);
-      else newSet.add(eventKey);
-      return newSet;
-    });
-  };
-
-  const [splitActive, setSplitActive] = useState(false);
-
-  const handleToggleSplit = () => {
-    setSplitActive((prev) => !prev);
-  };
-
-  const [splitModalVisible, setSplitModalVisible] = useState(false);
-  const [splitPercent, setSplitPercent] = useState(50); 
-  const [splitSide, setSplitSide] = useState("left"); 
-  const [eventToSplit, setEventToSplit] = useState(null);
-
-  const handleSplitEvent = (eventKey, mergedEvent) => {
-    const fullEvent =
-      mergedEvent._original ||
-      eventList.find(
-        (ev) =>
-          ev.merged &&
-          ev.parts[0].date.isSame((mergedEvent.parts && mergedEvent.parts[0] &&mergedEvent.parts[0].date) ||mergedEvent.parts[0].date,
-            "day"
-          ) &&
-          ev.parts[0].shift === mergedEvent.parts[0].shift &&
-          ev.parts[0].region === mergedEvent.parts[0].region &&
-          ev.parts[0].subItem === mergedEvent.parts[0].subItem &&
-          ev.parts[0].test === mergedEvent.parts[0].test
+      const base = dayjs("2026-04-01");
+      return Array.from({ length: 28 }, (_, i) =>
+        base.date(i + 1)
       );
-
-    if (!fullEvent) return;
-
-    if (fullEvent.split) {
-      Modal.confirm({
-        title: "Reset Split",
-        content:
-          "This event is already split. Do you want to reset it back to original?",
-        onOk: () => {
-          setEventList((prev) =>
-            prev.map((ev) =>
-              ev === fullEvent ? { ...ev, split: false, splitAt: null } : ev
-            )
-          );
-          message.success("Event reset to original!");
-        },
-        onCancel: () => {
-          message.info("This is not able to split because it is already split.");
-        },
-      });
-      return;
-    }
-
-    setEventToSplit(fullEvent);
-    setSplitPercent(50);
-    setSplitSide("left");
-    setSplitModalVisible(true);
-  };
-
-  const applySplitFromModal = () => {
-    const fullEvent = eventToSplit;
-    if (!fullEvent) {
-      setSplitModalVisible(false);
-      return;
-    }
-
-    const totalHours = fullEvent.parts.reduce((s, p) => s + p.hours, 0);
-    const pct = Math.max(1, Math.min(99, Number(splitPercent || 50)));
-    let leftHours;
-    if (splitSide === "left") {
-      leftHours = Math.round((totalHours * pct) / 100);
-    } else {
-      const rightHours = Math.round((totalHours * pct) / 100);
-      leftHours = totalHours - rightHours;
-    }
-
-    if (leftHours < 1) leftHours = 1;
-    if (leftHours > totalHours - 1) leftHours = totalHours - 1;
-
-    const rightHoursFinal = totalHours - leftHours;
-
-    if (leftHours <= 0 || rightHoursFinal <= 0) {
-      message.error("Split results in invalid hour distribution. Choose different percentage.");
-      return;
-    }
-
-    setEventList((prev) =>
-      prev.map((ev) =>
-        ev === fullEvent ? { ...ev, split: true, splitAt: leftHours } : ev
-      )
-    );
-
-    setSplitModalVisible(false);
-    setEventToSplit(null);
-    message.success(
-      `Test split applied: left ${leftHours}h / right ${rightHoursFinal}h (${pct}% on ${splitSide})`
-    );
-  };
-
-  const [dragModalVisible, setDragModalVisible] = useState(false);
-  const [eventToMove, setEventToMove] = useState(null);
-  const [dragForm, setDragForm] = useState({
-    date: null,
-    region: "",
-    shift: "",
   });
 
-  const handleEventDoubleClick = (mergedEvent) => {
-    const p0 = mergedEvent.parts[0];
-    setEventToMove(mergedEvent);
-    setDragForm({
-      date: p0.date,
-      region: `${p0.region}-${p0.subItem}`,
-      shift: String(p0.shift),
+const getWeeks = (days) => {
+  const weeks = [];
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+return weeks;
+};
+const handleMonthChange = (value) => {
+  if (!value) return;
+
+  setSelectedMonth(value);
+
+  const monthStart = value.startOf("month");
+
+  const startOfFirstWeek =
+  monthStart.startOf("isoWeek");
+
+  // Default = 4 weeks = 28 days
+  const defaultTotalWeeks = 4;
+
+  const endOfDefaultWeek =
+  startOfFirstWeek
+  .add(defaultTotalWeeks - 1, "week")
+  .startOf("isoWeek");
+
+  setSelectedWeekRange([
+      startOfFirstWeek,
+      endOfDefaultWeek,
+      ]);
+
+  const newDays = Array.from(
+    { length: defaultTotalWeeks * 7 },
+    (_, i) =>
+    startOfFirstWeek.add(i, "day")
+  );
+
+setSelectedDate(startOfFirstWeek);
+
+setDaysArray(newDays);
+};
+
+const handleSetupSave = () => {
+
+  if (!selectedMonth) {
+    message.error("Please select month");
+    return;
+  }
+
+if (
+  !selectedWeekRange ||
+  selectedWeekRange.length !== 2
+) {
+message.error("Please select week range");
+return;
+}
+
+if (!selectedTransformers.length) {
+  message.error("Please select transformer");
+  return;
+}
+
+if (!selectedVersion) {
+  message.error("Please create a version");
+  return;
+}
+
+const startWeek =
+selectedWeekRange[0].startOf("isoWeek");
+
+const endWeek =
+selectedWeekRange[1].endOf("isoWeek");
+
+// Calculate number of complete Monday -> Sunday weeks
+const totalWeeks =
+endWeek.diff(
+  startWeek,
+  "week"
+) + 1;
+
+// 4 weeks = 28 days
+// 5 weeks = 35 days
+const totalDays =
+totalWeeks * 7;
+if (
+  totalWeeks !== 4 &&
+  totalWeeks !== 5
+) {
+message.error(
+  "Please select exactly 4 or 5 weeks"
+);
+return;
+}
+
+const plannerDays =
+Array.from(
+  { length: totalDays },
+  (_, i) =>
+  startWeek.add(i, "day")
+);
+
+setDaysArray(plannerDays);
+
+setPlannerTransformers(selectedTransformers);
+
+setAvailablePlannerTransformers([]);
+
+setShowPlannerPage(true);
+}
+
+const weeks = getWeeks(daysArray);
+
+const getTransformerType = async (transformerId) => {
+
+  try {
+
+    const response = await fetch(
+      `http://3.7.251.192/api/get/dashboard/transformer/type?transformerId=${transformerId}`
+    );
+
+  const data = await response.json();
+
+  return data.result || "";
+
+} catch (error) {
+
+console.error("Transformer Type API Error", error);
+
+return "";
+
+}
+
+};
+const loadAllTransformerTests = async (transformerIds) => {
+
+  try {
+    console.time("Load Tests");
+    const responses = await Promise.all(
+
+      transformerIds.map(async (transformerId) => {
+
+          const [response, transformerType] = await Promise.all([
+
+              fetch(
+                "http://3.7.251.192/api/get/dashboard/block/hours/data",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "*/*",
+                  },
+                body: JSON.stringify([transformerId]),
+              }
+          ),
+
+        getTransformerType(transformerId),
+
+        ]);
+
+    const data = await response.json();
+
+    const apiItem = data.result?.[0];
+
+    if (!apiItem) return [];
+
+    return Object.entries(apiItem.hours)
+    .filter(([_, hrs]) => hrs > 0)
+    .map(([test, hrs]) => ({
+          id: `${transformerId}-${test}`,
+          transformer: transformerId,
+          label: test,
+          test,
+          durationHours: hrs,
+          transformerType: transformerType,
+          color: TRANSFORMER_COLORS[transformerId],
+          customerName: apiItem.customerName,
+        }));
+
+})
+
+);
+console.timeEnd("Load Tests");
+setPendingEvents(responses.flat());
+
+} catch (err) {
+
+console.error("API Error:", err);
+
+}
+
+};
+const loadAllTransformerCustomers = async () => {
+
+  try {
+
+    const responses = await Promise.all(
+
+      TRANSFORMERS.map(async (transformerId) => {
+
+          try {
+
+            const response = await fetch(
+              "http://3.7.251.192/api/get/dashboard/block/hours/data",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "*/*",
+                },
+              body: JSON.stringify([transformerId]),
+            }
+        );
+
+      const data = await response.json();
+
+      const apiItem =
+      data.result?.[0];
+
+      return {
+        transformerId,
+        customerName:
+        apiItem?.customerName || "-",
+      };
+
+  } catch (error) {
+
+  console.error(
+    `Customer API Error - ${transformerId}`,
+    error
+  );
+
+return {
+  transformerId,
+  customerName: "-",
+};
+
+}
+
+})
+
+);
+
+const customerMap = {};
+
+responses.forEach((item) => {
+
+    customerMap[item.transformerId] =
+    item.customerName;
+
+  });
+
+setTransformerCustomerMap(
+  customerMap
+);
+
+} catch (error) {
+
+console.error(
+  "Load Transformer Customers Error:",
+  error
+);
+
+}
+
+};
+useEffect(() => {
+
+    loadAllTransformerCustomers();
+
+  }, []);
+const toggleTransformer = (transformer) => {
+
+  setExpandedTransformers(prev => ({
+
+        ...prev,
+
+        [transformer]: !prev[transformer],
+
+      }));
+
+};
+const [witnessActive, setWitnessActive] = useState(false);
+const [witnessTests, setWitnessTests] = useState(new Set());
+const [witnessSideMap, setWitnessSideMap] = useState({});
+
+const [retestActive, setRetestActive] = useState(false);
+const [retestTests, setRetestTests] = useState(new Set());
+const [retestSideMap, setRetestSideMap] = useState({});
+
+const handleToggleWitness = () => {
+
+  if (!witnessActive && deleteActive) {
+    message.error("Cannot enable Witness while another mode is active");
+    return;
+  }
+
+if (!witnessActive) {
+  setRetestActive(false);
+}
+
+setWitnessActive(prev => !prev);
+
+};
+const handleToggleRetest = () => {
+
+  if (!retestActive && deleteActive) {
+    message.error("Cannot enable Retest while another mode is active");
+    return;
+  }
+
+if (!retestActive) {
+  setWitnessActive(false);
+}
+
+setRetestActive(prev => !prev);
+};
+const handleGroupTest = () => {
+
+  if (selectedEvents.size < 2) {
+
+    message.error(
+      "Select at least two events."
+    );
+
+  return;
+}
+
+setEventList(prev =>
+  prev.map(ev => {
+
+      if (
+        selectedEvents.has(ev.id)
+      ) {
+
+      return {
+        ...ev,
+        groupId:
+        nextGroupId,
+      };
+  }
+
+return ev;
+
+})
+);
+
+setNextGroupId(
+  prev => prev + 1
+);
+
+setSelectedEvents(
+  new Set()
+);
+
+message.success(
+  "Group created."
+);
+};
+const handleUngroup = () => {
+
+  if (selectedEvents.size === 0) {
+
+    message.error(
+      "Select at least one grouped event."
+    );
+
+  return;
+}
+
+setEventList(prev => {
+
+    let updated = [...prev];
+
+    const affectedGroups =
+    [
+      ...new Set(
+        updated
+        .filter(
+          ev =>
+          selectedEvents.has(ev.id) &&
+          ev.groupId !== null
+        )
+      .map(
+        ev => ev.groupId
+      )
+  )
+];
+
+updated =
+updated.map(ev => {
+
+    if (
+      selectedEvents.has(ev.id)
+    ) {
+
+    return {
+      ...ev,
+      groupId: null,
+    };
+}
+
+return ev;
+});
+
+
+affectedGroups.forEach(groupId => {
+
+    const remaining =
+    updated.filter(
+      ev =>
+      ev.groupId === groupId
+    );
+
+  if (
+    remaining.length === 1
+  ) {
+
+  updated =
+  updated.map(ev =>
+    ev.groupId === groupId
+    ? {
+      ...ev,
+      groupId: null,
+    }
+  : ev
+);
+}
+
+});
+
+return updated;
+
+});
+
+setSelectedEvents(
+  new Set()
+);
+
+message.success(
+  "Selected events removed from group."
+);
+};
+
+const handleToggleStar = (eventId, side = "left") => {
+  if (!witnessActive) return;
+
+  setWitnessTests((prev) => {
+      const newSet = new Set(prev);
+
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId);
+
+        setWitnessSideMap((m) => {
+            const copy = { ...m };
+            delete copy[eventId];
+            return copy;
+          });
+
+    } else {
+    newSet.add(eventId);
+
+    setWitnessSideMap((m) => ({
+          ...m,
+          [eventId]: side,
+        }));
+}
+
+return newSet;
+});
+
+};
+const handleToggleRetestStar = (eventId, side = "left") => {
+
+  if (!retestActive) return;
+
+  setRetestTests(prev => {
+
+      const newSet = new Set(prev);
+
+      if (newSet.has(eventId)) {
+
+        newSet.delete(eventId);
+
+        setRetestSideMap(m => {
+
+            const copy = { ...m };
+
+            delete copy[eventId];
+
+            return copy;
+
+          });
+
+    } else {
+
+    newSet.add(eventId);
+
+    setRetestSideMap(m => ({
+          ...m,
+          [eventId]: side,
+        }));
+
+}
+
+return newSet;
+
+});
+
+};
+
+const [draggingEvent, setDraggingEvent] = useState(null);
+const [dragMoved, setDragMoved] = useState(false);
+
+// const [isDragging, setIsDragging] = useState(false);
+
+const [showRightContainer, setShowRightContainer] = useState(true);
+
+const [selectedCells, setSelectedCells] = useState({});
+const [blockSelectedCells, setBlockSelectedCells] = useState({});
+
+const [blockSelectionActive, setBlockSelectionActive] = useState(false);
+
+const [isSelectingBlocks, setIsSelectingBlocks] = useState(false);
+
+const handleBlockCellSelect = (cellKey) => {
+
+  setBlockSelectedCells({
+      [cellKey]: true,
     });
-    setDragModalVisible(true);
-  };
 
-  const handleApplyDragDrop = () => {
-    if (!eventToMove) return;
+setBlockSelectionActive(true);
+};
 
-    const { date, region, shift } = dragForm;
-    if (!date || !region || !shift) {
-      message.error("Please fill all fields before applying.");
+const [selectedEvents, setSelectedEvents] = useState(new Set());
+const [nextGroupId, setNextGroupId] = useState(1);
+const [splitPercentage, setSplitPercentage] = useState(null);
+const [groupDragStart, setGroupDragStart] = useState(null);
+const [groupDragOffset, setGroupDragOffset] = useState({dx: 0, dy: 0,});
+
+const handleQueueDrop = (
+  x,
+  y,
+  queueEvent
+) => {
+
+if (
+  x < (2 * cellWidth) ||
+  y < headerHeight
+) {
+return;
+}
+
+const adjustedX =
+x - (2 * cellWidth);
+
+const adjustedY =
+y - headerHeight;
+
+const fullWeekHeight =
+singleWeekHeight + 20;
+
+const droppedWeekIndex =
+Math.floor(
+  y / fullWeekHeight
+);
+
+const yInsideWeek =
+y -
+(droppedWeekIndex * fullWeekHeight);
+
+if (
+  yInsideWeek < headerHeight
+) {
+return;
+}
+
+const regionIndex =
+Math.floor(
+  (yInsideWeek - headerHeight) /
+  (cellHeight * 3)
+);
+if (
+  regionIndex < 0 ||
+  regionIndex >= regions.length
+) {
+return;
+}
+
+const safeRegionIndex =
+Math.min(
+  Math.max(regionIndex, 0),
+  regions.length - 1
+);
+
+const oneDayWidth =
+3 * cellWidth;
+
+const localDayIndex =
+Math.floor(
+  adjustedX /
+  oneDayWidth
+);
+
+if (
+  localDayIndex < 0 ||
+  localDayIndex > 6
+) {
+return;
+}
+
+const safeDayIndex =
+droppedWeekIndex * 7 +
+localDayIndex;
+
+const clampedDayIndex =
+Math.min(
+  Math.max(
+    safeDayIndex,
+    0
+  ),
+daysArray.length - 1
+);
+
+const dropDate =
+daysArray[
+  clampedDayIndex
+  ];
+
+const rawOffset =
+adjustedX % oneDayWidth;
+
+const snappedShift =
+Math.round(
+  rawOffset / cellWidth
+);
+
+const offsetInsideDay =
+Math.min(
+  snappedShift * cellWidth,
+  2 * cellWidth
+);
+
+const localRowY =
+(yInsideWeek - headerHeight) %
+(cellHeight * 3);
+
+const snappedRow =
+Math.round(
+  localRowY /
+  cellHeight
+);
+
+const subIndex =
+Math.min(
+  Math.max(
+    snappedRow,
+    0
+  ),
+2
+);
+
+const regionName =
+regions[
+  safeRegionIndex
+  ].name;
+
+const subItemName =
+regions[
+  safeRegionIndex
+  ].subItems[subIndex];
+const totalShiftCells =
+Math.ceil(
+  (
+    queueEvent.durationHours / 8
+  ) +
+(
+  offsetInsideDay % cellWidth
+) / cellWidth
+);
+
+let blockedFound = false;
+
+let checkDate = dropDate;
+
+const startShiftIndex =
+Math.floor(
+  offsetInsideDay / cellWidth
+);
+
+let checkShift =
+SHIFT_ORDER[startShiftIndex];
+
+for (let i = 0; i < totalShiftCells; i++) {
+
+  const currentShiftIndex =
+  SHIFT_ORDER.indexOf(
+    checkShift
+  );
+
+const blockedCellKey =
+`${checkDate.format("YYYY-MM-DD")}-${regionName}-${subItemName}-${currentShiftIndex}`;
+
+if (
+  selectedCells[
+    blockedCellKey
+    ]
+) {
+blockedFound = true;
+break;
+}
+
+const next =
+nextShiftAndDate(
+  checkShift,
+  checkDate
+);
+
+checkShift =
+next.shift;
+
+checkDate =
+next.date;
+}
+if (blockedFound) {
+
+  message.error(
+    "Selected slot is blocked."
+  );
+
+return;
+}
+const newStart =
+offsetInsideDay;
+
+const newEnd =
+offsetInsideDay +
+Math.ceil(
+  queueEvent.durationHours / 8
+) * cellWidth
+
+const isOverlapping =
+eventList.some((ev) => {
+
+    const sameRow =
+    ev.region === regionName &&
+    ev.subItem === subItemName &&
+    ev.startDate.isSame(
+      dropDate,
+      "day"
+    );
+
+  if (!sameRow) {
+    return false;
+  }
+
+const evStart =
+ev.startOffset;
+
+const evEnd =
+ev.startOffset +
+(ev.durationHours / 8) *
+cellWidth;
+
+return (
+  newStart <= evEnd &&
+  newEnd >= evStart
+);
+});
+
+if (isOverlapping) {
+
+  message.error(
+    "Slot already occupied"
+  );
+
+return;
+}
+
+const newEvent = {
+  ...queueEvent,
+
+  id: Date.now(),
+
+  startDate: dropDate,
+
+  startOffset:
+  offsetInsideDay,
+
+  region: regionName,
+
+  subItem: subItemName,
+  groupId: null,
+};
+
+setEventList(prev => [
+    ...prev,
+    newEvent,
+    ]);
+};
+
+const handleDropPixel = (
+  x,
+  y,
+  node
+) => {
+
+if (!draggingEvent) {
+  dragInfoRef.current = null;
+  return;
+}
+
+const adjustedX = x - (2 * cellWidth);
+const adjustedY = y - headerHeight;
+
+let safeX = Math.max(0, adjustedX);
+let safeY = Math.max(0, adjustedY);
+const dayIndex = Math.floor(safeX / (cellWidth * 3));
+const fullWeekHeight =
+singleWeekHeight + 20;
+
+const droppedWeekIndex =
+Math.floor(safeY / fullWeekHeight);
+
+const yInsideWeek =
+safeY % fullWeekHeight;
+
+const regionIndex = Math.floor(
+  yInsideWeek / (cellHeight * 3)
+);
+
+const safeRegionIndex = Math.min(
+  Math.max(regionIndex, 0),
+  regions.length - 1
+);
+
+const oneDayWidth = 3 * cellWidth;
+
+const localDayIndex =
+Math.floor(adjustedX / oneDayWidth);
+
+const safeDayIndex =
+(droppedWeekIndex * 7) +
+localDayIndex;
+
+const offsetInsideDay =
+adjustedX % oneDayWidth;
+
+const localRowY =
+yInsideWeek % (cellHeight * 3);
+
+const snappedRow =
+Math.round(localRowY / cellHeight);
+
+const subIndex = Math.min(
+  Math.max(snappedRow, 0),
+  2
+);
+
+const clampedDayIndex =
+Math.min(
+  Math.max(safeDayIndex, 0),
+  daysArray.length - 1
+);
+
+const dropDate =
+daysArray[clampedDayIndex];
+const regionName = regions[safeRegionIndex].name;
+const subItemName =
+regions[safeRegionIndex].subItems[subIndex];
+//   const shiftIndex =
+// Math.round(offsetInsideDay / cellWidth);
+const shiftIndex = Math.min(
+  Math.floor(offsetInsideDay / cellWidth),
+  2
+);
+
+const totalShiftCells =
+Math.ceil(
+  (
+    draggingEvent.durationHours / 8
+  ) +
+(
+  offsetInsideDay % cellWidth
+) / cellWidth
+);
+
+let blockedFound = false;
+
+let checkDate = dropDate;
+const startShiftIndex =
+Math.floor(
+  offsetInsideDay / cellWidth
+);
+let checkShift =
+SHIFT_ORDER[startShiftIndex];
+
+for (let i = 0; i < totalShiftCells; i++) {
+
+  const currentShiftIndex =
+  SHIFT_ORDER.indexOf(checkShift);
+
+  const blockedCellKey =
+  `${checkDate.format("YYYY-MM-DD")}-${regionName}-${subItemName}-${currentShiftIndex}`;
+
+  if (selectedCells[blockedCellKey]) {
+    blockedFound = true;
+    break;
+  }
+
+const next =
+nextShiftAndDate(
+  checkShift,
+  checkDate
+);
+
+checkShift = next.shift;
+checkDate = next.date;
+}
+
+if (blockedFound) {
+
+  message.error(
+    "Selected slot is blocked."
+  );
+
+const dragInfo =
+dragInfoRef.current;
+
+if (dragInfo) {
+
+  node.absolutePosition({
+
+      x:
+      dragInfo.startX,
+
+      y:
+      dragInfo.startY,
+
+    });
+
+}
+
+node.getLayer()?.batchDraw();
+
+setDraggingEvent(null);
+
+dragInfoRef.current = null;
+
+return;
+}
+const getOccupiedCells = (
+  startDate,
+  startOffset,
+  durationHours
+) => {
+
+const cells = [];
+
+let currentDate = startDate;
+
+let currentShift =
+SHIFT_ORDER[
+  Math.floor(startOffset / cellWidth)
+  ];
+
+let remaining =
+durationHours;
+
+while (remaining > 0) {
+
+  cells.push({
+      date: currentDate.format("YYYY-MM-DD"),
+      shift: currentShift,
+    });
+
+remaining -= 8;
+
+if (remaining > 0) {
+
+  const next =
+  nextShiftAndDate(
+    currentShift,
+    currentDate
+  );
+
+currentShift =
+next.shift;
+
+currentDate =
+next.date;
+}
+}
+
+return cells;
+};
+
+const draggedCells =
+getOccupiedCells(
+  dropDate,
+  offsetInsideDay,
+  draggingEvent.durationHours
+);
+
+const isOverlapping =
+eventList.some((ev) => {
+
+    if (ev.id === draggingEvent.id) {
+      return false;
+    }
+
+  if (
+    ev.region !== regionName ||
+    ev.subItem !== subItemName
+  ) {
+  return false;
+}
+
+const occupiedCells =
+getOccupiedCells(
+  ev.startDate,
+  ev.startOffset,
+  ev.durationHours
+);
+
+return draggedCells.some(
+  (dragCell) =>
+  occupiedCells.some(
+    (cell) =>
+    cell.date === dragCell.date &&
+    cell.shift === dragCell.shift
+  )
+);
+});
+
+if (isOverlapping) {
+
+  message.error("Slot already occupied");
+
+  const savedDayIndex =
+  daysArray.findIndex((d) =>
+    d.isSame(
+      draggingEvent.startDate,
+      "day"
+    )
+);
+
+const savedWeekIndex =
+Math.floor(
+  savedDayIndex / 7
+);
+
+const localDayIndex =
+savedDayIndex % 7;
+
+const savedX =
+(2 + localDayIndex * 3) *
+cellWidth +
+draggingEvent.startOffset;
+
+let rowIndex = 0;
+
+for (const r of regions) {
+
+  for (const s of r.subItems) {
+
+    if (
+      r.name === draggingEvent.region &&
+      s === draggingEvent.subItem
+    ) {
+    break;
+  }
+
+rowIndex++;
+}
+
+if (
+  r.name === draggingEvent.region
+) {
+break;
+}
+}
+
+const savedY =
+(
+  savedWeekIndex *
+  (singleWeekHeight + 20)
+) +
+headerHeight +
+(
+  rowIndex *
+  cellHeight
+);
+
+node.absolutePosition({
+    x: savedX,
+    y: savedY,
+  });
+
+node.getLayer()?.batchDraw();
+
+setDraggingEvent(null);
+
+return;
+}
+if (
+  draggingEvent.test === "Sound Test" &&
+  draggingEvent.subItem === "LMS" &&
+  subItemName !== "LMS"
+) {
+
+setDraggingEvent(null);
+
+return;
+}
+
+setEventList((prev) => {
+
+
+    if (!draggingEvent.groupId) {
+
+      return prev.map((ev) =>
+        ev.id === draggingEvent.id
+        ? {
+          ...ev,
+          startDate: dropDate,
+          startOffset: offsetInsideDay,
+          region: regionName,
+          subItem: subItemName,
+        }
+      : ev
+    );
+
+}
+
+const draggedDayIndex =
+daysArray.findIndex(d =>
+  d.isSame(draggingEvent.startDate, "day")
+);
+
+const droppedDayIndex =
+daysArray.findIndex(d =>
+  d.isSame(dropDate, "day")
+);
+
+const dayDifference =
+droppedDayIndex - draggedDayIndex;
+
+const shiftDiff =
+offsetInsideDay -
+draggingEvent.startOffset;
+
+const draggedWeek =
+Math.floor(draggedDayIndex / 7);
+
+const droppedWeek =
+Math.floor(droppedDayIndex / 7);
+
+const draggedRow =
+getRowIndex(
+  draggingEvent.region,
+  draggingEvent.subItem
+);
+
+const droppedRow =
+getRowIndex(
+  regionName,
+  subItemName
+);
+
+const newEventList = prev.map(ev => {
+
+    if (ev.groupId !== draggingEvent.groupId) {
+      return ev;
+    }
+
+  const eventWeek =
+  Math.floor(
+    daysArray.findIndex(d =>
+      d.isSame(ev.startDate, "day")
+    ) / 7
+);
+
+const eventRow =
+getRowIndex(
+  ev.region,
+  ev.subItem
+);
+
+const rowOffset =
+eventRow - draggedRow;
+
+const weekOffset =
+eventWeek - draggedWeek;
+
+let finalWeek =
+droppedWeek + weekOffset;
+
+let finalRow =
+droppedRow + rowOffset;
+
+while (finalRow < 0) {
+  finalRow += ROWS_PER_WEEK;
+  finalWeek--;
+}
+
+while (finalRow >= ROWS_PER_WEEK) {
+  finalRow -= ROWS_PER_WEEK;
+  finalWeek++;
+}
+
+finalWeek = Math.max(
+  0,
+  Math.min(
+    weeks.length - 1,
+    finalWeek
+  )
+);
+
+const eventDay =
+daysArray.findIndex(d =>
+  d.isSame(ev.startDate, "day")
+);
+
+let finalDay =
+eventDay + dayDifference;
+
+let finalOffset =
+ev.startOffset + shiftDiff;
+
+while (finalOffset < 0) {
+  finalOffset += 3 * cellWidth;
+  finalDay--;
+}
+
+while (finalOffset >= 3 * cellWidth) {
+  finalOffset -= 3 * cellWidth;
+  finalDay++;
+}
+
+finalDay = Math.max(
+  0,
+  Math.min(
+    daysArray.length - 1,
+    finalDay
+  )
+);
+
+const dayInsideWeek =
+finalDay % 7;
+
+finalDay =
+(finalWeek * 7) +
+dayInsideWeek;
+
+finalDay = Math.max(
+  0,
+  Math.min(
+    daysArray.length - 1,
+    finalDay
+  )
+);
+
+const target =
+ALL_ROWS[finalRow];
+
+const updatedEvent = {
+
+  ...ev,
+
+  startDate: daysArray[finalDay],
+
+  startOffset: finalOffset,
+
+  region: target.region,
+
+  subItem: target.subItem,
+
+};
+
+return updatedEvent;
+
+});
+
+const finalGroupEvents =
+newEventList.filter(
+  ev =>
+  ev.groupId ===
+  draggingEvent.groupId
+);
+
+const hasBlockedCell =
+finalGroupEvents.some(groupEvent => {
+
+    const occupiedCells =
+    getOccupiedCells(
+      groupEvent.startDate,
+      groupEvent.startOffset,
+      groupEvent.durationHours
+    );
+
+  return occupiedCells.some(cell => {
+
+      const shiftIndex =
+      SHIFT_ORDER.indexOf(cell.shift);
+
+      const blockedKey =
+      `${cell.date}-${groupEvent.region}-${groupEvent.subItem}-${shiftIndex}`;
+
+      return selectedCells[blockedKey];
+
+    });
+
+});
+if (hasBlockedCell) {
+
+  message.error(
+    "Group contains blocked cells."
+  );
+
+const dragInfo =
+dragInfoRef.current;
+
+if (dragInfo) {
+
+  node.absolutePosition({
+
+      x:
+      dragInfo.startX,
+
+      y:
+      dragInfo.startY,
+
+    });
+
+}
+
+node.getLayer()?.batchDraw();
+
+setDraggingEvent(null);
+
+dragInfoRef.current = null;
+
+return prev;
+
+}
+
+const hasGroupOverlap =
+finalGroupEvents.some(groupEvent => {
+
+    const groupCells =
+    getOccupiedCells(
+      groupEvent.startDate,
+      groupEvent.startOffset,
+      groupEvent.durationHours
+    );
+
+  return prev.some(existingEvent => {
+
+      if (
+        existingEvent.groupId === draggingEvent.groupId
+      ) {
+      return false;
+    }
+
+  if (
+    existingEvent.region !== groupEvent.region ||
+    existingEvent.subItem !== groupEvent.subItem
+  ) {
+  return false;
+}
+
+const occupied =
+getOccupiedCells(
+  existingEvent.startDate,
+  existingEvent.startOffset,
+  existingEvent.durationHours
+);
+
+return groupCells.some(gc =>
+  occupied.some(ec =>
+    gc.date === ec.date &&
+    gc.shift === ec.shift
+  )
+);
+
+});
+
+});
+if (hasGroupOverlap) {
+
+  message.error(
+    "Group overlaps another event."
+  );
+
+const dragInfo =
+dragInfoRef.current;
+
+if (dragInfo) {
+
+  node.absolutePosition({
+
+      x:
+      dragInfo.startX,
+
+      y:
+      dragInfo.startY,
+
+    });
+
+}
+
+node.getLayer()?.batchDraw();
+
+setDraggingEvent(null);
+
+dragInfoRef.current = null;
+
+return;
+}
+
+return newEventList;
+
+});
+
+setDraggingEvent(null);
+dragInfoRef.current = null;
+};
+
+const handlePrintPlanner = () => {
+
+  if (eventList.length === 0) {
+
+    message.warning(
+      "No events are available on the planner to print."
+    );
+
+  return;
+}
+
+if (!stageRef.current) return;
+
+const dataURL = stageRef.current.toDataURL({
+    x: 0,
+    y: 0,
+    width: gridWidth,
+    height: totalStageHeight,
+    pixelRatio: 3,
+  });
+const pageWidth = 210;
+
+const pageHeight = 297;
+
+const leftSpace = 10;
+const rightSpace = 10;
+const topSpace = 30;
+const bottomSpace = 10;
+const plannerWidth = pageWidth - leftSpace - rightSpace;
+
+const plannerHeight = pageHeight - topSpace - bottomSpace;
+
+const monthName =
+daysArray.length
+? daysArray[0].format("MMMM YYYY")
+: "";
+
+const modifiedDate =
+dayjs().format("DD-MM-YYYY HH:mm");
+
+const printTransformerMap = {};
+
+eventList.forEach((event) => {
+
+    if (!event.transformer) {
       return;
     }
 
-    const [regionName, subItemName] = region.split("-");
-    const shiftNum = Number(shift);
+  if (!printTransformerMap[event.transformer]) {
 
-    setEventList((prev) =>
-      prev.map((ev) => {
-        if (ev === eventToMove._original || ev === eventToMove) {
-          let newParts = [];
-          let curDate = date.startOf("day");
-          let curShift = shiftNum;
-          for (let i = 0; i < ev.parts.length; i++) {
-            newParts.push({ ...ev.parts[i], date: curDate,shift: curShift, region: regionName, subItem: subItemName,
-            });
-            const next = nextShiftAndDate(curShift, curDate);
-            curDate = next.date;
-            curShift = next.shift;
-          }
-          return { ...ev, parts: newParts };
-        }
-        return ev;
-      })
+    printTransformerMap[event.transformer] = {
+      transformer: event.transformer,
+      customerName: event.customerName || "-",
+    };
+
+}
+
+});
+
+const printTransformerList = Object.values(printTransformerMap);
+
+const transformerCount = printTransformerList.length;
+
+let transformerFontSize = 7;
+
+if (transformerCount > 8) {
+  transformerFontSize = 6;
+}
+
+if (transformerCount > 12) {
+  transformerFontSize = 5;
+}
+
+if (transformerCount > 16) {
+  transformerFontSize = 4.5;
+}
+
+const iframe = document.createElement("iframe");
+
+iframe.style.position = "fixed";
+iframe.style.right = "0";
+iframe.style.bottom = "0";
+iframe.style.width = "0";
+iframe.style.height = "0";
+iframe.style.border = "0";
+
+document.body.appendChild(iframe);
+
+const doc =
+iframe.contentWindow.document;
+
+doc.open();
+
+doc.write(`
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<style>
+
+@page{
+    size:A4 portrait;
+    margin:8mm;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    font-family:Arial;
+}
+
+.header{
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.line{
+    border-bottom:1px solid #999;
+    margin:6px 0;
+}
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin-bottom:2px;
+}
+
+.planner{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-top:2mm;
+  height:${plannerHeight}mm;
+  overflow:hidden;
+}
+
+.planner img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:fill;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+TDMS PLANNING DASHBOARD
+</div>
+
+<div class="line"></div>
+
+<div class="info">
+
+<div>Version : ${selectedVersion || "-"}</div>
+<div>Month : ${monthName}</div>
+<div>Modified Date : ${modifiedDate}</div>
+
+</div>
+
+<div class="planner">
+
+<img
+src="${dataURL}"
+style="
+width:100%;
+height:${plannerHeight}mm;
+
+">
+
+</div>
+
+</div>
+<div class="transformer-section">
+
+  <div
+    class="transformer-details"
+    style="font-size:${transformerFontSize}px;"
+  >
+    ${printTransformerList.map((item, index) => {
+      const customerShort =
+        (item.customerName || "-").substring(0, 5);
+
+      return `
+  <span class="transformer-item">
+  ${item.transformer} - ${customerShort}
+  </span>
+  ${
+    index < printTransformerList.length - 1
+    ? `<span class="transformer-separator">|</span>`
+    : ""
+  }
+`;
+    }).join("")}
+  </div>
+</div>
+
+</body>
+
+</html>
+`);
+
+doc.close();
+
+iframe.onload = () => {
+
+  iframe.contentWindow.focus();
+
+  iframe.contentWindow.print();
+
+  setTimeout(() => {
+
+      document.body.removeChild(iframe);
+
+    },1000);
+
+};
+
+};
+const [deleteActive, setDeleteActive] = useState(false);
+const handleDeleteEvent = (eventKey, eventObj) => {
+  Modal.confirm({
+      title: "Are you sure?",
+      content: "Do you want to delete this event?",
+      onOk: () => {
+        setEventList(prev =>
+          prev.filter(ev => ev !== (eventObj._original || eventObj))
+        );
+      message.success("Event deleted");
+    },
+  onCancel: () => {
+    message.info("Cancelled");
+  }
+});
+};
+const handleSplitTask = (percentage) => {
+
+  if (selectedEvents.size !== 1) {
+    message.error(
+      "Please select exactly one event to split."
     );
 
-    setDragModalVisible(false);
-    setEventToMove(null);
-    message.success("✅ Event moved successfully!");
-  };
+  setSplitPercentage(null);
 
-  return (
-    <div className="monthly-grid-container">
-      <h2 className="title">Monthly Data</h2>
-      <div className="buttons">
-        <button
-          onClick={handleToggleWitness}
-          style={{ position: "relative", paddingRight: "20px" }}
-        >
-          Add Customer Witness
-          {witnessActive && <span className="witness-dot"></span>}
-        </button>
+  return;
+}
 
-        <button
-          onClick={handleToggleSplit}
-          style={{ position: "relative", paddingRight: "20px" }}
-        >
-          Split Selected Vertically
-          {splitActive && <span className="witness-dot"></span>}
-        </button>
+if (!percentage) {
+  message.error(
+    "Please select split percentage."
+  );
+setSplitPercentage(null);
 
-        <button onClick={() => setShowCalendar(true)}>Calendar</button>
-        <button onClick={() => setShowCreateTest(true)}>Create Test</button>
-        <button>Delete Test</button>
-      </div>
+return;
+}
 
-      <Modal
-        title="Select Date Range"
-        open={showCalendar}
-        onOk={applyDateRange}
-        onCancel={handleCancel}
-        okText="OK"
-      >
-        <RangePicker
-          value={tempRange}
-          onChange={(values) => setTempRange(values || [])}
-          defaultPickerValue={[dayjs("2025-08-01"), dayjs("2025-08-01")]}
-          disabledDate={(current) =>
-            current && current.isBefore(dayjs("2025-08-01"), "day")
-          }
-        />
-      </Modal>
+const selectedEventId =
+[...selectedEvents][0];
 
-      <Modal
-        title="Create Test"
-        open={showCreateTest}
-        onOk={handleCreateTest}
-        onCancel={() => setShowCreateTest(false)}
-        okText="Create"
-        className="create-test-modal"
-      >
-        <div className="form-group">
-          <label>Name of the Test</label>
-          <select
-            className="form-control"
-            value={testForm.name}
-            onChange={(e) => setTestForm({ ...testForm, name: e.target.value })}
-          >
-            <option value="">Select Test</option>
-            <option value="SfraA1">SfraA1</option>
-            <option value="SfraA2">SfraA2</option>
-            <option value="TestA1">TestA1</option>
-          </select>
-        </div>
+const originalEvent =
+eventList.find( ev => ev.id === selectedEventId );
 
-        <div className="form-group">
-          <label>Date to Start</label>
-          <DatePicker
-            value={testForm.date}
-            onChange={(date) => setTestForm({ ...testForm, date })}
-            disabledDate={(current) =>
-              current && current.isBefore(dayjs("2025-08-01"), "day")
-            }
-            className="form-control"
-          />
-        </div>
+if (!originalEvent) {
+  message.error(
+    "Selected event not found."
+  );
 
-        <div className="form-group">
-          <label>Region</label>
-          <select
-            className="form-control"
-            value={testForm.region}
-            onChange={(e) =>
-              setTestForm({ ...testForm, region: e.target.value })
-            }
-          >
-            <option value="">Select Region</option>
-            {regions.map((reg) => (
-              <optgroup key={reg.name} label={reg.name}>
-                {reg.subItems.map((sub) => (
-                  <option key={`${reg.name}-${sub}`} value={`${reg.name}-${sub}`}>
-                    {sub}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
+setSplitPercentage(null);
 
-        <div className="form-group">
-          <label>Test Hours</label>
-          <input
-            type="number"
-            className="form-control"
-            value={testForm.hours}
-            onChange={(e) =>
-              setTestForm({ ...testForm, hours: parseInt(e.target.value, 10) })
-            }
-            placeholder="Enter hours"
-            min={1}
-          />
-        </div>
+return;
+}
 
-        <div className="form-group">
-          <label>Shift</label>
-          <select
-            className="form-control"
-            value={testForm.shift}
-            onChange={(e) =>
-              setTestForm({ ...testForm, shift: e.target.value })
-            }
-          >
-            <option value="">Select Shift</option>
-            <option value="3">3</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-          </select>
-        </div>
-      </Modal>
+const totalHours =
+Number(
+  originalEvent.durationHours
+);
 
-      <Modal
-        title={
-          eventToSplit
-            ? `Split "${eventToSplit.parts[0].label || eventToSplit.parts[0].test}"`
-            : "Split Test"
-        }
-        open={splitModalVisible}
-        onOk={applySplitFromModal}
-        onCancel={() => {
-          setSplitModalVisible(false);
-          setEventToSplit(null);
-        }}
-        okText="Apply Split"
-      >
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Choose percentage (1 - 99)</strong>
-          </div>
-          <Slider
-            min={1}
-            max={99}
-            value={splitPercent}
-            onChange={(val) => setSplitPercent(val)}
-          />
-          <div style={{ marginTop: 8, textAlign: "center" }}>
-            <span style={{ fontWeight: 600 }}>{splitPercent}%</span>
-          </div>
-        </div>
+if (!totalHours || totalHours <= 0) {
 
-        <div style={{ marginTop: 8 }}>
-          <div style={{ marginBottom: 8 }}>
-            <strong>Apply percentage to</strong>
-          </div>
-          <Radio.Group
-            onChange={(e) => setSplitSide(e.target.value)}
-            value={splitSide}
-          >
-            <Radio value="left">Left</Radio>
-            <Radio value="right">Right</Radio>
-          </Radio.Group>
-        </div>
+  message.error(
+    "Invalid event duration."
+  );
 
-        <div style={{ marginTop: 12, color: "#666", fontSize: 13 }}>
-          <div>
-            Example: if total hours = 24 and you choose <b>{splitPercent}%</b> on{" "}
-            <b>{splitSide}</b>, distribution will be computed in hours and stored.
-          </div>
-        </div>
-      </Modal>
+setSplitPercentage(null);
 
-      <Modal
-        title={
-          eventToMove
-            ? `Move "${eventToMove.parts[0].label || eventToMove.parts[0].test}" to…`
-            : "Move Event"
-        }
-        open={dragModalVisible}
-        onOk={handleApplyDragDrop}
-        onCancel={() => setDragModalVisible(false)}
-        okText="Apply"
-        cancelText="Cancel"
-      >
-        <div className="form-group">
-          <label>Date to Drag and Drop</label>
-          <DatePicker
-            value={dragForm.date}
-            onChange={(val) => setDragForm({ ...dragForm, date: val })}
-            style={{ width: "100%" }}
-          />
-        </div>
+return;
+}
 
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Region</label>
-          <select
-            className="form-control"
-            value={dragForm.region}
-            onChange={(e) => setDragForm({ ...dragForm, region: e.target.value })}
-          >
-            <option value="">Select Region</option>
-            {regions.map((reg) => (
-              <optgroup key={reg.name} label={reg.name}>
-                {reg.subItems.map((sub) => (
-                  <option key={`${reg.name}-${sub}`} value={`${reg.name}-${sub}`}>
-                    {sub}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
+const part1Hours =
+totalHours *
+(percentage / 100);
 
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label>Shift</label>
-          <select
-            className="form-control"
-            value={dragForm.shift}
-            onChange={(e) => setDragForm({ ...dragForm, shift: e.target.value })}
-          >
-            <option value="">Select Shift</option>
-            <option value="3">3</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-          </select>
-        </div>
-      </Modal>
+const part2Hours =
+totalHours -
+part1Hours;
 
-      {weeks.length > 0 ? (
-        weeks.map((weekDays, weekIdx) => (
-          <table className="schedule-table" key={weekIdx}>
-            <thead>
-              <tr>
-                <th rowSpan="3" className="region-col">
-                  Region
-                </th>
-                <th rowSpan="3" className="sub-col">
-                  Sub Item
-                </th>
-                {weekDays.map((d, i) => (
-                  <th key={i} colSpan={shifts.length} className="day-header">
-                    {d.format("dddd")}
-                  </th>
-                ))}
-              </tr>
-              <tr>
-                {weekDays.map((d, i) => (
-                  <th key={i} colSpan={shifts.length} className="date-cell">
-                    {d.format("DD-MM")}
-                  </th>
-                ))}
-              </tr>
-              <tr className="shift-row">
-                {weekDays.map((_, i) =>
-                  shifts.map((s, idx) => (
-                    <th
-                      key={`${i}-${s}`}
-                      className={`shift-cell ${idx === 2 ? "black-separator" : ""}`}
-                    >
-                      {s}
-                    </th>
-                  ))
-                )}
-              </tr>
-            </thead>
+if (
+  part1Hours <= 0 ||
+  part2Hours <= 0
+) {
 
-            <tbody>
-              {regions.map((region) =>
-                region.subItems.map((sub, i) => (
-                  <tr key={`${region.name}-${sub}`}>
-                    {i === 0 && (
-                      <td rowSpan={region.subItems.length} className="region-name">
-                        {region.name}
-                      </td>
-                    )}
-                    <td className="sub-name">{sub}</td>
+message.error(
+  "Split percentage creates an invalid duration."
+);
 
-                    {weekDays.map((d, dayIdx) =>
-                      shifts.map((s, shiftIdx) => {
-                        let mergedEvent = null;
+setSplitPercentage(null);
 
-                        const evContaining = eventList.find((ev) =>
-                          ev.merged &&
-                          ev.parts.some(
-                            (p) =>
-                              p.date.isSame(d, "day") &&
-                              p.shift === s &&
-                              p.region === region.name &&
-                              p.subItem === sub
-                          )
-                        );
+return;
+}
 
-                        if (evContaining) {
-                          const currentWeekStart = weekDays[0];
-                          const currentWeekEnd = weekDays[weekDays.length - 1];
-                          const indicesInWeek = evContaining.parts
-                            .map((p, idx) => ({ p, idx }))
-                            .filter(
-                              ({ p }) =>
-                                !p.date.isBefore(currentWeekStart, "day") &&
-                                !p.date.isAfter(currentWeekEnd, "day")
-                            ) 
-                            .map(({ idx }) => idx);
+let part2Date = originalEvent.startDate;
 
-                          if (indicesInWeek.length > 0) {
-                            const firstWeekPartIdx = indicesInWeek[0];
-                            const lastWeekPartIdx = indicesInWeek[indicesInWeek.length - 1];
+let part2Offset = Number(
+  originalEvent.startOffset || 0
+);
 
-                            const currentPartIndex = evContaining.parts.findIndex(
-                              (p) =>
-                                p.date.isSame(d, "day") &&
-                                p.shift === s &&
-                                p.region === region.name &&
-                                p.subItem === sub
-                            );
+let remainingHours = part1Hours;
 
-                            if (currentPartIndex === firstWeekPartIdx) {
-                              const partsFromHere = evContaining.parts.slice(
-                                firstWeekPartIdx,
-                                lastWeekPartIdx + 1
-                              );
-                              mergedEvent = { ...evContaining, parts: partsFromHere, _original: evContaining };
-                            }
-                          }
-                        }
+let currentShiftIndex = Math.floor(
+  part2Offset / cellWidth
+);
 
-                        if (mergedEvent) {
-                          const totalCells = mergedEvent.parts.length;
-                          const totalHours = mergedEvent.parts.reduce(
-                            (sum, p) => sum + p.hours,
-                            0
-                          );
-                          const firstPart = mergedEvent.parts[0];
+currentShiftIndex = Math.max(
+  0,
+  Math.min(
+    2,
+    currentShiftIndex
+  )
+);
 
-                          const lastPart =
-                            mergedEvent.parts[mergedEvent.parts.length - 1];
-                          const coversShift2 = lastPart && lastPart.shift === 2;
+const offsetInsideShift =
+part2Offset -
+currentShiftIndex * cellWidth;
 
-                          const originalEv = mergedEvent._original || mergedEvent;
-                          const eventKey = `${region.name}-${sub}-${originalEv.parts[0].date.format(
-                            "YYYY-MM-DD"
-                          )}-${originalEv.parts[0].test}`;
+const hoursInsideCurrentShift =
+(
+  offsetInsideShift /
+  cellWidth
+) * 8;
 
-                          const isSplit = Boolean(originalEv.split);
-                          const splitAtGlobal = originalEv.splitAt ?? null;
+let availableHours =
+8 - hoursInsideCurrentShift;
 
-                          let shouldRenderSplitHere = false;
-                          let leftPct = 50;
-                          let rightPct = 50;
+if (
+  remainingHours <= availableHours
+) {
 
-                          if (isSplit && splitAtGlobal != null) {
-                            const idxInOriginal = originalEv.parts.findIndex(
-                              (p) =>
-                                p.date.isSame(firstPart.date, "day") &&
-                                p.shift === firstPart.shift &&
-                                p.region === firstPart.region &&
-                                p.subItem === firstPart.subItem &&
-                                p.test === firstPart.test
-                            );
-                            let prefixHours = 0;
-                            for (let k = 0; k < idxInOriginal; k++) {
-                              prefixHours += originalEv.parts[k].hours;
-                            }
-                            const sliceHours = mergedEvent.parts.reduce((s, p) => s + p.hours, 0);
+part2Offset =
+part2Offset +
+(
+  remainingHours / 8
+) * cellWidth;
 
-                            if (splitAtGlobal > prefixHours && splitAtGlobal < prefixHours + sliceHours) {
-                              shouldRenderSplitHere = true;
-                              const localSplitHours = splitAtGlobal - prefixHours;
-                              leftPct = (localSplitHours / sliceHours) * 100;
-                              rightPct = 100 - leftPct;
-                            } else {
-                              shouldRenderSplitHere = false;
-                            }
-                          }
+remainingHours = 0;
 
-                          if (isSplit && shouldRenderSplitHere) {
-                            const colorLeft = mergedEvent.parts[0].color;
-                            const colorRight = mergedEvent.parts[0].color;
+}
 
-                            const leftKey = `${eventKey}-left`;
-                            const rightKey = `${eventKey}-right`;
+else {
 
-                            return (
-                              <td
-                                key={`${dayIdx}-${s}`}
-                                colSpan={totalCells}
-                                className={`cell shift-cell ${coversShift2 ? "black-separator" : ""}`}
-                                style={{ padding: 0 }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    width: `${(totalHours / (8 * totalCells)) * 100}%`,
-                                    height: "100%",
-                                  }}
-                                  onDoubleClick={() => handleEventDoubleClick(mergedEvent)}
-                                >
-                                  <div
-                                    onClick={() => {
-                                      if (witnessActive) handleToggleStar(leftKey);
-                                      if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                    }}
-                                    style={{
-                                      width: `${leftPct}%`,
-                                      height: "100%",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundColor: colorLeft,
-                                      boxSizing: "border-box",
-                                      textAlign: "center",
-                                      borderRadius: "4px",
-                                      cursor:
-                                        witnessActive || splitActive ? "pointer" : "default",
-                                    }}
-                                  >
-                                    <span className="event-text">
-                                      {firstPart.label}
-                                      {witnessTests.has(leftKey) && (
-                                        <span className="event-star">⭐</span>
-                                      )}
-                                    </span>
-                                  </div>
+  remainingHours -= availableHours;
 
-                                  <div
-                                    onClick={() => {
-                                      if (witnessActive) handleToggleStar(rightKey);
-                                      if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                    }}
-                                    style={{
-                                      width: `${rightPct}%`,
-                                      height: "100%",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundColor: colorRight,
-                                      boxSizing: "border-box",
-                                      textAlign: "center",
-                                      borderRadius: "4px",
-                                      borderLeft: "1px solid black",
-                                      cursor:
-                                        witnessActive || splitActive ? "pointer" : "default",
-                                    }}
-                                  >
-                                    <span className="event-text">
-                                      {firstPart.label}
-                                      {witnessTests.has(rightKey) && (
-                                        <span className="event-star">⭐</span>
-                                      )}
-                                    </span>
-                                  </div>
-                                </div>
-                              </td>
-                            );
-                          }
+  let currentShift =
+  SHIFT_ORDER[currentShiftIndex];
 
-                          return (
-                            <td
-                              key={`${dayIdx}-${s}`}
-                              colSpan={totalCells}
-                              className={`cell shift-cell ${
-                                coversShift2 ? "black-separator" : ""
-                              }`}
-                            >
-                              <div
-                                className="event-block"
-                                style={{
-                                  backgroundColor: firstPart.color,
-                                  color: "black",
-                                  height: "100%",
-                                  width: `${(totalHours / (8 * totalCells)) * 100}%`,
-                                  textAlign: "left",
-                                  cursor:
-                                    witnessActive || splitActive ? "pointer" : "default",
-                                }}
-                                onClick={() => {
-                                  if (witnessActive) handleToggleStar(eventKey);
-                                  if (splitActive) handleSplitEvent(eventKey, mergedEvent);
-                                }}
-                                onDoubleClick={() => handleEventDoubleClick(mergedEvent)}
-                              >
-                                <span className="event-text">
-                                  {firstPart.label}
-                                  {witnessTests.has(eventKey) && (
-                                    <span className="event-star">⭐</span>
-                                  )}
-                                </span>
-                              </div>
-                            </td>
-                          );
-                        }
+  while (remainingHours > 0) {
 
-                        const insideSpan = eventList.some(
-                          (ev) =>
-                            ev.merged &&
-                            ev.parts.some(
-                              (p) =>
-                                p.date.isSame(d, "day") &&
-                                p.shift === s &&
-                                p.region === region.name &&
-                                p.subItem === sub
-                            )
-                        );
-                        if (insideSpan) return null;
+    const next =
+    nextShiftAndDate(
+      currentShift,
+      part2Date
+    );
 
-                        return (
-                          <td
-                            key={`${dayIdx}-${s}`}
-                            className={`cell shift-cell ${
-                              shiftIdx === 2 ? "black-separator" : ""
-                            }`}
-                          />
-                        );
-                      })
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        ))
-      ) : (
-        <p>No dates to show</p>
-      )}
-    </div>
+  currentShift = next.shift;
+  part2Date = next.date;
+
+  currentShiftIndex =
+  SHIFT_ORDER.indexOf(
+    currentShift
+  );
+
+if (remainingHours < 8) {
+
+  part2Offset =
+  currentShiftIndex *
+  cellWidth +
+  (
+    remainingHours / 8
+  ) * cellWidth;
+
+remainingHours = 0;
+
+break;
+}
+remainingHours -= 8;
+
+if (remainingHours === 0) {
+
+  const following =
+  nextShiftAndDate(
+    currentShift,
+    part2Date
+  );
+
+currentShift =
+following.shift;
+
+part2Date =
+following.date;
+
+currentShiftIndex =
+SHIFT_ORDER.indexOf(
+  currentShift
+);
+
+part2Offset =
+currentShiftIndex *
+cellWidth;
+
+break;
+}
+}
+}
+
+const timestamp = Date.now();
+
+const part1 = {
+  ...originalEvent,
+
+  id:
+  `${originalEvent.id}-part1-${timestamp}`,
+
+  durationHours:
+  part1Hours,
+
+  label:
+  originalEvent.label,
+
+  groupId:
+  null,
+};
+
+const part2 = {
+  ...originalEvent,
+
+  id:
+  `${originalEvent.id}-part2-${timestamp}`,
+
+  durationHours:
+  part2Hours,
+
+  label:
+  originalEvent.label,
+
+  startDate:
+  part2Date,
+
+  startOffset:
+  part2Offset,
+
+  groupId:
+  null,
+};
+
+setEventList(prev => {
+
+    const updatedEvents =
+    prev.flatMap(ev => {
+
+        if (
+          ev.id !== originalEvent.id
+        ) {
+        return [ev];
+      }
+
+    return [
+      part1,
+      part2,
+      ];
+  });
+
+console.log(
+  "EVENTS AFTER SPLIT:",
+  updatedEvents
+);
+
+return updatedEvents;
+});
+
+setSelectedEvents(
+  new Set()
+);
+
+setSplitPercentage(null);
+
+message.success(
+  `Task split into ${part1Hours}h + ${part2Hours}h`
+);
+};
+const handleToggleDelete = () => {
+  if (!deleteActive && (witnessActive || retestActive)) {
+    message.error("Cannot enable Delete while another mode is active");
+    return;
+  }
+
+setDeleteActive(prev => !prev);
+};
+const handleBlock = () => {
+
+  if (!blockSelectionActive) return;
+
+  const occupiedCellKeys = new Set();
+
+  eventList.forEach((ev) => {
+
+      const duration =
+      Number(ev.durationHours || 0);
+
+      if (duration <= 0) return;
+
+
+      const startShiftIndex = Math.max(
+        0,
+        Math.min(
+          2,
+          Math.floor(
+            Number(ev.startOffset || 0) /
+            cellWidth
+          )
+      )
+  );
+const startHourInsideDay =
+(
+  Number(ev.startOffset || 0) /
+  cellWidth
+) * 8;
+
+const endHour =
+startHourInsideDay +
+duration;
+
+const startDate =
+ev.startDate.startOf("day");
+
+const daysNeeded =
+Math.ceil(
+  endHour / 24
+);
+
+for (
+  let dayOffset = 0;
+  dayOffset <= daysNeeded;
+  dayOffset++
+) {
+
+const currentDate =
+startDate.add(
+  dayOffset,
+  "day"
+);
+
+const dayStartHour =
+dayOffset * 24;
+
+const dayEndHour =
+dayStartHour + 24;
+
+const eventStartInDay =
+Math.max(
+  0,
+  startHourInsideDay -
+  dayStartHour
+);
+
+const eventEndInDay =
+Math.min(
+  24,
+  endHour -
+  dayStartHour
+);
+
+
+if (
+  eventEndInDay <=
+  eventStartInDay
+) {
+continue;
+}
+
+for (
+  let shiftIdx = 0;
+  shiftIdx < 3;
+  shiftIdx++
+) {
+
+const cellStartHour =
+shiftIdx * 8;
+
+const cellEndHour =
+cellStartHour + 8;
+
+const overlapStart =
+Math.max(
+  eventStartInDay,
+  cellStartHour
+);
+
+const overlapEnd =
+Math.min(
+  eventEndInDay,
+  cellEndHour
+);
+
+const occupiedHours =
+Math.max(
+  0,
+  overlapEnd -
+  overlapStart
+);
+
+if (occupiedHours > 0) {
+
+  const cellKey =
+  `${currentDate.format("YYYY-MM-DD")}-${ev.region}-${ev.subItem}-${shiftIdx}`;
+
+  occupiedCellKeys.add(
+    cellKey
   );
 }
+
+}
+
+}
+
+});
+
+const cellsToBlock = {};
+
+const selectedKeys =
+Object.keys(
+  blockSelectedCells
+);
+
+selectedKeys.forEach((cellKey) => {
+
+    if (
+      !occupiedCellKeys.has(cellKey)
+    ) {
+
+    cellsToBlock[cellKey] = true;
+  }
+
+});
+
+setSelectedCells(prev => ({
+      ...prev,
+      ...cellsToBlock,
+    }));
+
+setBlockSelectedCells({});
+
+setBlockSelectionActive(false);
+
+setIsSelectingBlocks(false);
+
+const skippedCells =
+selectedKeys.length -
+Object.keys(
+  cellsToBlock
+).length;
+
+if (skippedCells > 0) {
+
+  message.warning(
+    `${skippedCells} selected cell(s) contain event hours and were not blocked.`
+  );
+
+} else {
+
+message.success(
+  "Selected empty cells blocked."
+);
+
+}
+
+};
+const handleUnBlock = () => {
+
+  if (!blockSelectionActive) return;
+
+  setSelectedCells(prev => {
+
+      const updated = {
+        ...prev
+      };
+
+    Object.keys(
+      blockSelectedCells
+    ).forEach(key => {
+      delete updated[key];
+    });
+
+return updated;
+});
+
+setBlockSelectedCells({});
+
+setBlockSelectionActive(false);
+
+setIsSelectingBlocks(false);
+};
+
+const getMonthTitle = () => {
+  if (!daysArray.length) return "Monthly Data";
+
+  const firstMonth = daysArray[0].format("MMMM");
+  const lastMonth = daysArray[daysArray.length - 1].format("MMMM");
+
+  const versionText =
+  selectedVersion
+  ? ` | Version : ${selectedVersion}`
+  : "";
+
+  if (firstMonth === lastMonth) {
+    return `${firstMonth} Monthly Data${versionText}`;
+  }
+
+return `${firstMonth} - ${lastMonth} Monthly Data${versionText}`;
+
+};
+const handleRemoveTransformer = (transformer) => {
+
+  const existsOnGrid = eventList.some(
+    (ev) => ev.transformer === transformer
+  );
+
+if (existsOnGrid) {
+  message.error(
+    "Transformer cannot be removed ."
+  );
+return;
+}
+
+setPlannerTransformers((prev) =>
+  prev.filter((t) => t !== transformer)
+);
+
+setSelectedTransformer((prev) =>
+  prev.filter((t) => t !== transformer)
+);
+
+setPendingEvents((prev) =>
+  prev.filter(
+    (ev) => ev.transformer !== transformer
+  )
+);
+
+message.success("Transformer removed.");
+
+};
+
+const cellWidth = 50;
+const cellHeight = 50;
+const headerHeight = 60;
+const gridStartX = 2 * cellWidth;  
+
+const totalCols = 2 + (7 * shifts.length);
+
+const queueWidth = 270;
+
+const gridWidth = totalCols * cellWidth;
+const stageWidth = gridWidth + queueWidth;
+const totalRows = regions.reduce(
+  (sum, region) => sum + region.subItems.length,
+  0
+);
+
+const singleWeekHeight = headerHeight +
+totalRows * cellHeight;
+
+const totalStageHeight =
+(weeks.length * singleWeekHeight) +
+((weeks.length - 1) * 20);
+const groupedPendingEvents = pendingEvents.reduce((acc, ev) => {
+
+    if (!acc[ev.transformer]) {
+      acc[ev.transformer] = [];
+    }
+
+  acc[ev.transformer].push(ev);
+
+  return acc;
+
+}, {});
+
+const isExcludedFromLmsUsage = (ev) => {
+
+  const testName =
+  ev.test ||
+  ev.label ||
+  "";
+
+  return (
+    testName === "REL" ||
+    testName === "PRE"
+  );
+
+};
+const lmsUsage = {
+  EHV: 0,
+  NORTH: 0,
+  SOUTH: 0,
+};
+
+eventList.forEach((ev) => {
+
+    if (ev.subItem !== "LMS") {
+      return;
+    }
+
+  if (isExcludedFromLmsUsage(ev)) {
+    return;
+  }
+
+const hours =
+Number(ev.durationHours || 0);
+
+if (ev.region === "EHV") {
+  lmsUsage.EHV += hours;
+}
+
+if (ev.region === "NORTH") {
+  lmsUsage.NORTH += hours;
+}
+
+if (ev.region === "SOUTH") {
+  lmsUsage.SOUTH += hours;
+}
+
+});
+
+return (
+  <div className="monthly-grid-container" >
+  <div
+  style={{
+      color: "#084a91",
+      fontSize: "24px",
+      fontWeight: "700",
+      textTransform: "uppercase",
+      marginBottom: "12px",
+    }}
+>
+PLANNING DASH BOARD
+</div>
+{!showPlannerPage && (
+    <PlannerSetup
+    selectedMonth={selectedMonth}
+    selectedWeekRange={selectedWeekRange}
+    selectedTransformers={selectedTransformers}
+    selectedVersion={selectedVersion}
+
+    handleMonthChange={handleMonthChange}
+    setSelectedWeekRange={setSelectedWeekRange}
+    setDaysArray={setDaysArray}
+    setSelectedDate={setSelectedDate}
+    setIsSelectingWeekRange={setIsSelectingWeekRange}
+
+    setSelectedTransformer={setSelectedTransformer}
+    setPendingEvents={setPendingEvents}
+    loadAllTransformerTests={loadAllTransformerTests}
+
+    setSelectedVersion={setSelectedVersion}
+    handleSetupSave={handleSetupSave}
+
+    TRANSFORMERS={TRANSFORMERS}
+    />
+  )}
+{showPlannerPage && (
+    <>
+    <h2 className="title">{getMonthTitle()}</h2>
+    <PlannerToolbar
+    witnessActive={witnessActive}
+    retestActive={retestActive}
+    splitPercentage={splitPercentage}
+    blockSelectionActive={blockSelectionActive}
+    deleteActive={deleteActive}
+    selectedEvents={selectedEvents}
+
+    handleToggleWitness={handleToggleWitness}
+    handleToggleRetest={handleToggleRetest}
+
+    handleSplitTask={(value) => {
+        setSplitPercentage(value);
+        handleSplitTask(value);
+      }}
+
+  handlePrintPlanner={handlePrintPlanner}
+  handleGroupTest={handleGroupTest}
+  handleUngroup={handleUngroup}
+  handleToggleDelete={handleToggleDelete}
+  handleBlock={handleBlock}
+  handleUnBlock={handleUnBlock}
+  />
+
+  <Card
+  size="small"
+  style={{
+      width: "100%",
+      marginBottom: 16,
+    }}
+title={
+  <div
+  style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      width: "100%",
+    }}
+>
+<span
+style={{
+    fontSize: 16,
+    fontWeight: 600,
+  }}
+>
+Selected Transformers List
+</span>
+
+<div
+style={{
+    fontWeight: 400,
+    marginRight: 60,
+  }}
+>
+<Space size={12}>
+<span>Usage of LMS (Hrs)</span>
+
+<span>
+EHV : <b>{lmsUsage.EHV}</b>
+</span>
+
+<span>
+NORTH : <b>{lmsUsage.NORTH}</b>
+</span>
+
+<span>
+SOUTH : <b>{lmsUsage.SOUTH}</b>
+</span>
+</Space>
+</div>
+</div>
+}
+extra={
+  <Space size={8}>
+  <Select
+  mode="multiple"
+  size="small"
+  placeholder="Select Transformer"
+  value={selectedPlannerTransformer}
+  onChange={setSelectedPlannerTransformer}
+  allowClear
+  showSearch
+  optionFilterProp="children"
+  maxTagCount={1}
+  style={{
+      width:180,      // little wider
+    }}
+className="planner-transformer-select"
+>
+{selectedTransformers.map((trf) => (
+      <Select.Option
+      key={trf}
+      value={trf}
+      >
+      {trf}
+      </Select.Option>
+    ))}
+</Select>
+
+<Button
+size="small"
+type="default"
+onClick={() =>
+  setAddTransformerModalOpen(true)
+}
+>
+Add Transformer
+</Button>
+</Space>
+}
+>
+
+<div
+style={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    minHeight: "38px",
+    alignItems: "center",
+  }}
+>
+
+{plannerTransformers.length === 0 ? (
+
+    <span
+    style={{
+        color: "#8c8c8c",
+        fontSize: "13px",
+      }}
+  >
+  No transformers selected.
+  </span>
+
+) : (
+
+plannerTransformers.map((transformer) => (
+
+    <Tag
+    key={transformer}
+    style={{
+        padding: "4px 10px",
+        fontSize: "13px",
+        borderRadius: "4px",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+      }}
+  >
+  <span>{transformer}</span>
+
+  <span
+  onClick={() =>
+    handleRemoveTransformer(transformer)
+  }
+style={{
+    color: "#ff4d4f",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "14px",
+  }} >
+✕
+</span>
+
+</Tag>
+
+))
+
+)}
+
+</div>
+
+</Card>
+
+<TransformerModal
+addTransformerModalOpen={
+  addTransformerModalOpen
+}
+
+setAddTransformerModalOpen={
+  setAddTransformerModalOpen
+}
+
+modalTransformers={
+  modalTransformers
+}
+
+setModalTransformers={
+  setModalTransformers
+}
+
+selectedTransformers={
+  selectedTransformers
+}
+
+setSelectedTransformer={
+  setSelectedTransformer
+}
+
+setPlannerTransformers={
+  setPlannerTransformers
+}
+
+loadAllTransformerTests={
+  loadAllTransformerTests
+}
+
+TRANSFORMERS={
+  TRANSFORMERS
+}
+
+transformerCustomerMap={
+  transformerCustomerMap
+}
+/>
+
+<div
+id="planner-print-area"
+style={{
+    display: "flex",
+    alignItems: "flex-start",
+  }}
+>
+<div
+style={{
+    flex: 1,
+    marginRight: 0,
+    paddingRight: 0,
+  }}
+>
+<Stage
+ref={stageRef}
+width={stageWidth}
+height={totalStageHeight}
+>
+<Layer>
+
+{weeks.map((weekDays, weekIdx) => {
+
+      const headerRow1 = 30;
+      const headerRow2 = 30;
+
+      const headerHeight =
+      headerRow1 + headerRow2;
+
+      const totalCols = 2 + weekDays.length * 3;
+      const totalRows = regions.reduce((s, r) => s + r.subItems.length, 0);
+
+      // const stageWidth = totalCols * cellWidth;
+      // const stageHeight = headerHeight + totalRows * cellHeight;
+      const weekOffsetY =
+      weekIdx * (singleWeekHeight + 20);
+
+      return (
+        <Group
+        key={weekIdx}
+        y={weekOffsetY}
+        >
+        <Rect x={0} y={0} width={cellWidth} height={headerHeight} fill="#fafafa" />
+        <Text x={0} y={0} width={cellWidth} height={headerHeight} text="Region" align="center" verticalAlign="middle" fontStyle="bold" />
+
+        <Rect
+        x={cellWidth}
+        y={0}
+        width={cellWidth}
+        height={headerHeight}
+        fill="#fafafa" />
+        <Text
+        x={cellWidth}
+        y={0}
+        width={cellWidth}
+        height={headerHeight}
+        text="Sub Item" align="center" verticalAlign="middle" fontStyle="bold" />
+
+        {weekDays.map((d, i) => {
+              const baseX = (2 + i * 3) * cellWidth;
+
+              return (
+                <Group key={i}>
+                <Rect x={baseX} y={0} width={cellWidth * 3} height={30} fill="#f5f5f5" />
+                <Text x={baseX} y={0} width={cellWidth * 3} height={30} text={`${d.format("ddd")}               ${d.format("MM-DD")}`} align="center" verticalAlign="middle" />
+
+                {shifts.map((s, idx) => {
+                      const x = baseX + idx * cellWidth;
+
+                      return (
+                        <Group key={idx}>
+                        <Rect x={x} y={30} width={cellWidth} height={30} fill="#fff" />
+                        <Text x={x} y={30} width={cellWidth} height={30} text={String(s)} align="center" verticalAlign="middle" />
+                        </Group>
+                      );
+                  })}
+            </Group>
+          );
+      })}
+
+{(() => {
+      let rowCounter = 0;
+
+      return regions.map((region) =>
+        region.subItems.map((sub, sIdx) => {
+            const rowY = headerHeight + rowCounter * cellHeight;
+            const isFirst = sIdx === 0;
+
+            const group = (
+              <Group key={`${region.name}-${sub}`}>
+
+              {isFirst && (
+                  <>
+                  <Rect
+                  x={0}
+                  y={rowY}
+                  width={cellWidth}
+                  height={cellHeight * region.subItems.length}
+                  fill="#fafafa"
+                  />
+                  <Text
+                  x={0}
+                  y={rowY}
+                  width={cellWidth}
+                  height={cellHeight * region.subItems.length}
+                  text={region.name}
+                  align="center"
+                  verticalAlign="middle"
+                  fontStyle="bold"
+                  />
+
+                  </>
+                )}
+
+            <Rect x={cellWidth} y={rowY} width={cellWidth} height={cellHeight} fill="#fff" />
+            <Text
+            x={cellWidth + 6}
+            y={rowY}
+            width={cellWidth - 6}
+            height={cellHeight}
+            text={sub}
+            verticalAlign="middle"
+            />
+
+            {weekDays.map((_, dayIdx) =>
+                shifts.map((_, shiftIdx) => {
+                    const colIndex = 2 + dayIdx * 3 + shiftIdx;
+                    const cellKey =
+                    `${weekDays[dayIdx].format("YYYY-MM-DD")}-${region.name}-${sub}-${shiftIdx}`;
+
+                    return (
+                      <Rect
+                      key={`${dayIdx}-${shiftIdx}`}
+                      x={colIndex * cellWidth}
+                      y={rowY}
+                      width={cellWidth}
+                      height={cellHeight}
+
+                      fill={
+                        weekDays[dayIdx].day() === 0 ||
+                        weekDays[dayIdx].day() === 6
+                        ? "#e0e0e0"
+                        : selectedCells[cellKey]
+                        ? blockSelectedCells[cellKey]
+                        ? "rgb(255,153,153)"
+                        : "rgb(138,138,138)"
+                        : blockSelectedCells[cellKey]
+                        ? "rgb(245,247,159)"
+                        : "#fff"
+                      }
+
+                    onMouseDown={() => {
+
+                        const isWeekend =
+                        weekDays[dayIdx].day() === 0 ||
+                        weekDays[dayIdx].day() === 6;
+
+                        if (isWeekend) return;
+
+                        setIsSelectingBlocks(true);
+
+                        handleBlockCellSelect(cellKey);
+                      }}
+
+                  onMouseEnter={() => {
+
+                      if (!isSelectingBlocks) return;
+
+                      setBlockSelectedCells(prev => ({
+                            ...prev,
+                            [cellKey]: true,
+                          }));
+
+                    setBlockSelectionActive(true);
+                  }}
+
+              onMouseUp={() => {
+                  setIsSelectingBlocks(false);
+                }}
+
+            />
+          );
+      })
+)}
+</Group>
+);
+
+rowCounter++;
+return group;
+})
+);
+})()}
+
+<Rect
+x={0}
+y={0}
+width={gridWidth}
+height={singleWeekHeight}
+fillEnabled={false}
+stroke="#000"
+strokeWidth={1.5}
+/>
+
+{Array.from({ length: totalCols + 1 }).map((_, col) => {
+      const x = col * cellWidth;
+
+      const isMajorLine =
+      col === 0 ||
+      col === 1 ||
+      col === 2 ||
+      col === totalCols ||
+      ((col - 2) % 3 === 0 && col >= 2);
+
+      return (
+        <Group key={`hv-${col}`}>
+
+        {isMajorLine && (
+            <Rect
+            x={x}
+            y={0}
+            width={1}
+            height={headerRow1 + headerRow2}
+            fill="#000"
+            />
+          )}
+
+      {!isMajorLine && (
+          <Rect
+          x={x}
+          y={headerRow1}
+          width={1}
+          height={headerRow2}
+          fill="#000"
+          />
+        )}
+
+    </Group>
+  );
+})}
+
+{Array.from({ length: totalCols + 1 }).map((_, col) => {
+      const x =
+      col === totalCols
+      ? (col * cellWidth) - 1
+      : col * cellWidth;
+
+      let color = "#ccc";
+      if (col === 0 || col === 1 || col === totalCols) color = "#000";
+      if ((col - 2) % 3 === 0 && col >= 2) color = "#000";
+
+      return (
+        <Rect
+        key={`v-${col}`}
+        x={x}
+        y={headerRow1 + headerRow2} 
+        width={1}
+        height={singleWeekHeight - (headerRow1 + headerRow2)}
+        fill={color}
+        />
+      );
+  })}
+
+{Array.from({ length: totalRows + 3 }).map((_, i) => {
+      let y;
+
+      if (i === 0) y = 0;
+      else if (i === 1) y = 30;
+      else if (i === 2) y = 60;
+
+      else y = headerHeight + (i - 3) * cellHeight;
+
+      let rowIndex = i - 3;
+      if (rowIndex < 0) rowIndex = -1;
+
+      let cumulative = 0;
+      let isRegionEnd = false;
+
+      for (let r of regions) {
+        cumulative += r.subItems.length;
+        if (rowIndex === cumulative) isRegionEnd = true;
+      }
+
+    return (
+      <Group key={`h-${i}`}>
+      {i <= 2 && (
+          <>
+
+          {i === 2 && (
+              <Rect x={0} y={y} width={stageWidth} height={1} fill="#000" />
+            )}
+        {i !== 2 && (
+            <Rect
+            x={cellWidth * 2}
+            y={y}
+            width={stageWidth - (cellWidth * 2)}
+            height={1}
+            fill="#000"
+            />
+          )}
+      </>
+    )}
+{i > 2 && isRegionEnd && (
+    <Rect
+    x={0}
+    y={y }
+    width={gridWidth}
+    height={1}
+    fill="#000" />
+  )}
+
+{i > 2 && !isRegionEnd && (
+    <Rect
+    x={i === 3 ? 0 : cellWidth}
+    y={y}
+    width={i === 3 ? stageWidth : stageWidth - cellWidth}
+    height={1}
+    fill={i === 3 ? "#000" : "#ccc"}
+
+    />
+  )}
+
+</Group>
+);
+})}
+
+{(() => {
+      const visibleEvents =
+      selectedPlannerTransformer.length === 0
+      ? eventList
+      : eventList.filter(ev =>
+        selectedPlannerTransformer.includes(ev.transformer)
+      );
+    let rowCounter = 0;
+
+    return regions.map((region) =>
+      region.subItems.map((sub) => {
+          const rowY = headerHeight + rowCounter * cellHeight;
+          const elements = [];
+
+          weekDays.forEach((d, dayIdx) => {
+              const matchingEvents =
+              visibleEvents.filter(
+                (ev) =>
+                ev.startDate.isSame(d, "day") &&
+                ev.region === region.name &&
+                ev.subItem === sub
+              );
+
+            if (!matchingEvents.length) return;
+
+            matchingEvents.forEach((matchingEvent, eventIndex) => {
+
+                const startCol = 2 + dayIdx * 3;
+                const totalWidth =
+                (matchingEvent.durationHours / 8) * cellWidth;
+
+                const eventStartX =
+                startCol * cellWidth +
+                matchingEvent.startOffset;
+
+                const currentWeekRightEdge =
+                gridWidth;
+
+                const remainingWidthInWeek =
+                currentWeekRightEdge -
+                eventStartX;
+
+                const overflowWidth =
+                Math.max(
+                  0,
+                  totalWidth -
+                  remainingWidthInWeek
+                );
+
+              const hasOverflow = overflowWidth > 0;
+
+              const leftWidth = totalWidth;
+
+              const hasStar = witnessTests.has(matchingEvent.id);
+
+              const hasRetest =
+              retestTests.has(matchingEvent.id);
+
+              const groupDotColor =
+              matchingEvent.groupId
+              ? GROUP_COLORS[
+                (matchingEvent.groupId - 1) %
+                GROUP_COLORS.length
+                ]
+              : null;
+
+              elements.push(
+                <Group
+                key={`${region.name}-${sub}-${dayIdx}-${matchingEvent.id}-${eventIndex}`}
+                x={startCol * cellWidth + matchingEvent.startOffset}
+                y={rowY}
+                draggable
+                listening={true}
+
+                dragBoundFunc={(pos) => {
+
+                    let minX = 2 * cellWidth;
+
+                    let maxX =
+                    gridWidth -
+                    totalWidth;
+
+                    if (matchingEvent.groupId) {
+
+                      const groupEvents =
+                      visibleEvents.filter(
+                        e =>
+                        e.groupId ===
+                        matchingEvent.groupId
+                      );
+
+                    let leftLimit = minX;
+                    let rightLimit = maxX;
+
+                    // Get the actual drag-start X position.
+                    const dragStartX =
+                    matchingEvent._dragStartX ??
+                    dragInfoRef.current?.startX ??
+                    pos.x;
+
+                    groupEvents.forEach(ev => {
+
+                        const eventDay =
+                        daysArray.findIndex(d =>
+                          d.isSame(
+                            ev.startDate,
+                            "day"
+                          )
+                      );
+
+                    if (eventDay === -1) {
+                      return;
+                    }
+
+                  const eventX =
+                  (2 + (eventDay % 7) * 3) *
+                  cellWidth +
+                  ev.startOffset;
+
+                  const eventWidth =
+                  (ev.durationHours / 8) *
+                  cellWidth;
+
+                  const relativeOffset =
+                  eventX -
+                  dragStartX;
+
+                  leftLimit =
+                  Math.max(
+                    leftLimit,
+                    minX -
+                    relativeOffset
+                  );
+
+                rightLimit =
+                Math.min(
+                  rightLimit,
+                  (gridWidth -
+                    eventWidth) -
+                  relativeOffset
+                );
+
+            });
+
+        minX = leftLimit;
+        maxX = rightLimit;
+      }
+
+    const minY = headerHeight;
+
+    const maxY =
+    totalStageHeight - cellHeight;
+
+    if (
+      matchingEvent.test === "Sound Test" &&
+      matchingEvent.subItem === "LMS"
+    ) {
+
+    return {
+      x: Math.max(minX, Math.min(pos.x, maxX)),
+      y: rowY,
+    };
+}
+
+const fullWeekHeight =
+singleWeekHeight + 20;
+
+const weekIndex =
+Math.floor(pos.y / fullWeekHeight);
+
+const weekStartY =
+weekIndex * fullWeekHeight;
+
+const insideWeekY =
+pos.y - weekStartY;
+
+const clampedInsideY =
+Math.max(
+  headerHeight,
+  Math.min(
+    insideWeekY,
+    singleWeekHeight - cellHeight
+  )
+);
+
+const snappedInsideY =
+Math.round(
+  (clampedInsideY - headerHeight) /
+  cellHeight
+) *
+cellHeight +
+headerHeight;
+
+const snappedY =
+weekStartY + snappedInsideY;
+
+return {
+  x: Math.max(minX, Math.min(pos.x, maxX)),
+  y: Math.max(minY, Math.min(snappedY, maxY)),
+};
+
+}}
+
+// onDragStart={() => {
+    //   setDraggingEvent(matchingEvent);
+    //   setDragMoved(false);
+    // }}
+onDragStart={(e) => {
+
+    const node =
+    e.target;
+    const absolutePos =
+    node.getAbsolutePosition();
+
+    dragInfoRef.current = {
+
+      id:
+      matchingEvent.id,
+
+      startX:
+      absolutePos.x,
+
+      startY:
+      absolutePos.y,
+
+      startDate:
+      matchingEvent.startDate,
+
+      startOffset:
+      matchingEvent.startOffset,
+
+      region:
+      matchingEvent.region,
+
+      subItem:
+      matchingEvent.subItem,
+
+      groupId:
+      matchingEvent.groupId,
+
+    };
+
+  matchingEvent._dragStartX =
+  absolutePos.x;
+
+  matchingEvent._dragStartY =
+  absolutePos.y;
+
+  setDraggingEvent({
+      ...matchingEvent,
+    });
+
+setDragMoved(false);
+
+if (
+  matchingEvent.groupId
+) {
+
+setGroupDragStart({
+
+    startDate:
+    matchingEvent.startDate,
+
+    startOffset:
+    matchingEvent.startOffset,
+
+    groupId:
+    matchingEvent.groupId,
+
+  });
+
+}
+
+}}
+
+onDragMove={(e) => {
+
+    setDragMoved(true);
+
+    if (
+      matchingEvent.groupId &&
+      groupDragStart
+    ) {
+
+    setGroupDragOffset({
+
+        dx:
+        e.target.x() -
+        matchingEvent._dragStartX,
+
+        dy:
+        e.target.y() -
+        matchingEvent._dragStartY,
+
+      });
+
+}
+
+}}
+onDragEnd={(e) => {
+
+    const node =
+    e.target;
+
+    const pos =
+    node.getAbsolutePosition();
+
+    handleDropPixel(
+      pos.x,
+      pos.y,
+      node
+    );
+
+  setGroupDragOffset({
+      dx: 0,
+      dy: 0,
+    });
+
+setGroupDragStart(null);
+
+matchingEvent._dragStartX =
+undefined;
+
+matchingEvent._dragStartY =
+undefined;
+
+}}
+
+onClick={(e) => {
+    if (dragMoved) {
+      setDragMoved(false);
+      return;
+    }
+
+  const eventId = matchingEvent.id;
+  if (
+    !deleteActive &&
+    !witnessActive &&
+    !retestActive
+  ) {
+
+  setSelectedEvents((prev) => {
+
+      const next = new Set(prev);
+
+      if (next.has(eventId)) {
+        next.delete(eventId);
+      } else {
+      next.add(eventId);
+    }
+
+  return next;
+
+});
+
+return;
+}
+
+if (deleteActive) {
+  handleDeleteEvent(eventId, matchingEvent);
+  return;
+}
+
+if (witnessActive) {
+
+  const stage = e.target.getStage();
+
+  const pointerPos = stage.getPointerPosition();
+
+  const localX =
+  pointerPos.x -
+  (startCol * cellWidth + matchingEvent.startOffset);
+
+  const clickedSide =
+  localX < leftWidth ? "left" : "right";
+
+  handleToggleStar(eventId, clickedSide);
+
+  return;
+
+}
+
+if (retestActive) {
+
+  const stage = e.target.getStage();
+
+  const pointerPos = stage.getPointerPosition();
+
+  const localX =
+  pointerPos.x -
+  (startCol * cellWidth + matchingEvent.startOffset);
+
+  const clickedSide =
+  localX < leftWidth ? "left" : "right";
+
+  handleToggleRetestStar(eventId, clickedSide);
+
+  return;
+
+}
+
+}}
+>
+<Rect
+x={0}
+y={3}
+width={leftWidth}
+height={cellHeight - 6}
+fill={matchingEvent.color}
+cornerRadius={4}
+
+stroke={
+  selectedEvents.has(
+    matchingEvent.id
+  )
+? "#4B7BEC"
+: undefined
+}
+
+strokeWidth={
+  selectedEvents.has(
+    matchingEvent.id
+  )
+? 2
+: 0
+}
+/>
+{hasOverflow && (
+    <Rect
+    x={
+      gridWidth -
+      (2 * cellWidth)
+    }
+  y={3}
+  width={overflowWidth}
+  height={cellHeight - 6}
+  fill={matchingEvent.color}
+  cornerRadius={4}
+  />
+)}
+
+<Text
+x={0}
+y={0}
+width={leftWidth}
+fontSize={12}
+height={cellHeight}
+text={`${matchingEvent.transformer} (${matchingEvent.durationHours}h)
+              ${matchingEvent.label}`}
+  align="center"
+  verticalAlign="middle"
+  />
+  {hasStar &&
+    witnessSideMap[matchingEvent.id] === "left" && (
+      <Star
+      x={
+        hasRetest &&
+        retestSideMap[matchingEvent.id] === "left"
+        ? leftWidth - 28
+        : leftWidth - 10
+      }
+    y={12}
+    numPoints={5}
+    innerRadius={5}
+    outerRadius={9}
+    fill="#FFD700"
+    stroke="#C99700"
+    strokeWidth={1}
+    listening={false}
+    />
+  )}
+{hasRetest &&
+  retestSideMap[matchingEvent.id] === "left" && (
+    <Group
+    x={leftWidth - 12}
+    y={3}
+    listening={false}
+    >
+    <Star
+    x={0}
+    y={9}
+    numPoints={5}
+    innerRadius={5}
+    outerRadius={9}
+    fill="#FFD700"
+    stroke="#C99700"
+    strokeWidth={1}
+    />
+
+    <Text
+    x={-6}
+    y={4}
+    width={12}
+    height={10}
+    text="R"
+    align="center"
+    verticalAlign="middle"
+    fontSize={8}
+    fontStyle="bold"
+    fill="#000"
+    />
+    </Group>
+  )}
+
+{hasOverflow && (
+    <Text
+    x={
+      gridWidth -
+      (2 * cellWidth)
+    }
+  y={0}
+  width={overflowWidth}
+  height={cellHeight}
+  text={matchingEvent.label}
+  align="center"
+  verticalAlign="middle"
+  />
+)}
+{matchingEvent.groupId && (
+    <Rect
+    x={leftWidth - 12}
+    y={4}
+    width={8}
+    height={8}
+    fill={groupDotColor}
+    cornerRadius={4}
+    listening={false}
+    />
+  )}
+</Group>
+);
+
+});
+});
+rowCounter++;
+return elements;
+})
+);
+})()}
+
+</Group>
+);
+})}
+<Group>
+
+<Rect
+x={gridWidth}
+y={0}
+width={queueWidth}
+height={totalStageHeight}
+fill="#fafafa"
+
+/>
+<Rect
+x={gridWidth}
+y={0}
+width={1}
+height={totalStageHeight}
+fill="#000"
+/>
+<Rect
+x={gridWidth}
+y={0}
+width={queueWidth}
+height={1}
+fill="#000"
+/>
+
+<Rect
+x={gridWidth + queueWidth - 1}
+y={0}
+width={1}
+height={totalStageHeight}
+fill="#000"
+/>
+
+<TestQueue
+gridWidth={gridWidth}
+queueWidth={queueWidth}
+totalStageHeight={totalStageHeight}
+headerHeight={headerHeight}
+cellWidth={cellWidth}
+cellHeight={cellHeight}
+singleWeekHeight={singleWeekHeight}
+
+groupedPendingEvents={groupedPendingEvents}
+expandedTransformers={expandedTransformers}
+toggleTransformer={toggleTransformer}
+
+draggingQueueEvent={draggingQueueEvent}
+handleQueueDrop={handleQueueDrop}
+/>
+
+</Group>
+</Layer>
+</Stage>
+
+</div>
+
+{!showRightContainer && (
+    <div
+    style={{
+        position: "fixed",
+        right: "18px",
+        top: "138px",
+        zIndex: 1000,
+
+      }}
+  >
+  <button
+  onClick={() => setShowRightContainer(true)}
+  style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      padding: "8px 12px",
+      background: "#ffffff",
+      border: "1px solid #d9d9d9",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontSize: "13px",
+      fontWeight: "500",
+      color: "#333",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+    }}
+>
+
+<div
+style={{
+    width: "14px",
+    height: "14px",
+    border: "1px solid #666",
+    borderRadius: "2px",
+    background: "#f5f5f5",
+  }}
+/>
+
+Show tests
+</button>
+
+</div>
+)}
+
+</div>
+</>
+)}
+
+</div>
+
+);}
 export default MonthlyDataGrid;
-
-
-
-
-
-
-
-
 
